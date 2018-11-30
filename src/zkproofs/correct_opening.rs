@@ -36,7 +36,7 @@ where
 mod tests {
 
     use super::*;
-    use cryptography_utils::BigInt;
+    use curv::BigInt;
     use paillier::Keypair;
 
     fn test_keypair() -> Keypair {

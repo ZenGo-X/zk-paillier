@@ -13,8 +13,8 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
-use cryptography_utils::arithmetic::traits::Samplable;
-use cryptography_utils::BigInt;
+use curv::arithmetic::traits::Samplable;
+use curv::BigInt;
 use paillier::arithimpl::traits::ModMul;
 use paillier::arithimpl::traits::ModPow;
 use paillier::traits::{Add, Mul};
@@ -179,7 +179,7 @@ impl<'a> NISigmaProof<Proof<'a>, Witness<'a>, Statement<'a>> for Proof<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cryptography_utils::BigInt;
+    use curv::BigInt;
     use paillier::EncryptWithChosenRandomness;
     use paillier::KeyGeneration;
 

@@ -13,7 +13,7 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
-use cryptography_utils::arithmetic::traits::Samplable;
+use curv::arithmetic::traits::Samplable;
 use std::borrow::Borrow;
 use std::mem;
 
@@ -22,7 +22,7 @@ use rand::prelude::*;
 use rayon::prelude::*;
 use ring::digest::{Context, SHA256};
 
-use cryptography_utils::BigInt;
+use curv::BigInt;
 use paillier::traits::*;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};

@@ -37,7 +37,7 @@ mod range_proof_ni;
 pub use self::range_proof_ni::RangeProofNi;
 mod equal_message_proof;
 
-use cryptography_utils::BigInt;
+use curv::BigInt;
 use ring::digest::{Context, SHA256};
 use std::borrow::Borrow;
 

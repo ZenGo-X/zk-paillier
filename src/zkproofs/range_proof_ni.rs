@@ -13,11 +13,9 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
-use cryptography_utils::BigInt;
+use curv::BigInt;
 use paillier::arithimpl::traits::Samplable;
 use paillier::{EncryptWithChosenRandomness, EncryptionKey, Paillier, RawCiphertext};
-use ring::digest::{Context, SHA256};
-use std::borrow::Borrow;
 use std::error::Error;
 use std::fmt;
 use zkproofs::range_proof::RangeProof;

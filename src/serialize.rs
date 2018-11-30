@@ -1,6 +1,6 @@
 pub mod bigint {
 
-    use cryptography_utils::BigInt;
+    use curv::BigInt;
     use serde::{de, ser};
     use std::fmt;
 
@@ -30,7 +30,7 @@ pub mod bigint {
 
 pub mod vecbigint {
 
-    use cryptography_utils::BigInt;
+    use curv::BigInt;
     use serde::de::SeqAccess;
     use serde::ser::SerializeSeq;
     use serde::{de, ser};

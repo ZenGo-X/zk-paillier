@@ -18,8 +18,8 @@ use std::error::Error;
 use std::fmt;
 use std::iter;
 
-use cryptography_utils::arithmetic::traits::Samplable;
-use cryptography_utils::BigInt;
+use curv::arithmetic::traits::Samplable;
+use curv::BigInt;
 use paillier::arithimpl::traits::ModPow;
 use paillier::arithimpl::traits::EGCD;
 use paillier::{extract_nroot, DecryptionKey, EncryptionKey};

@@ -16,7 +16,7 @@
 use std::iter;
 use std::ops::Shl;
 
-use cryptography_utils::BigInt;
+use curv::BigInt;
 use paillier::arithimpl::traits::ModPow;
 use paillier::{extract_nroot, CorrectKeyProofError, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
