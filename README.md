@@ -14,6 +14,9 @@ Currently implemented proofs
 * non-interacrive roof that two paillier ciphertext are encrypting the same message under two different keys
 * proof of correct opening of a ciphertext
 
+Usage
+-------------------
+There is no unified API at the moment, please follow the test attached to each proof for example usage. 
 
 Legacy 
 -------------------
