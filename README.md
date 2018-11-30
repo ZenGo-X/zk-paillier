@@ -1,2 +1,34 @@
-# rust-paillier-zk
-A collection of Paillier cryptosystem zero knowledge proofs 
+Zero Knowledge Paillier
+-------------------
+This library contains a collection of Paillier cryptosystem zero knowledge proofs written in Rust. 
+Each proof can be used as a stand alone proof but usually it will be used as part of another protocol. 
+For each proof we state in comments what are the security assumption required. Pay special attention to proofs that require more assumptions than just DCRA which is the assumption used in Paillier cryptosystem.
+
+Currently implemented proofs
+-------------------
+
+* proof of correct paillier keypair generation
+* non-interactive proof of correct paillier keypair generation
+* range proof that a paillier ciphertext lies in interval [0,q]
+* non-interactive range proof that a paillier ciphertext lies in interval [0,q]
+* non-interacrive roof that two paillier ciphertext are encrypting the same message under two different keys
+* proof of correct opening of a ciphertext
+
+
+Legacy 
+-------------------
+[Rust-paillier](https://github.com/mortendahl/rust-paillier) was orignally a library that implemented the basic Paillier cryptosystem with main contributors from [Snips](https://github.com/snipsco). Catalyzed by KZen needs for paillier zero knowledge proofs the original library was forked and another layer of proofs was added. As more and more zk-proofs were being added we realized that the base paillier cryptosystem layer is at a point of stability and only minor changes are required once in a while where on the other hand the second layer of zk-proofs are evolving at a much faster pace and the code should be considered more experimental. At this point we agreed to divide the library to the base layer (rust-paillier) and zk-paillier which is the current library. 
+
+Finally. we would like to thank [Morten Dahl](https://github.com/mortendahl),lead maintainer of rust-paillier and KZen advisor. another thank you goes to [Pascal Paillier](https://github.com/Pascal-Paillier).
+
+Development Process
+-------------------
+The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md), in addition **the [Rust utilities wiki](https://github.com/KZen-networks/rust-utils/wiki) contains information on workflow and environment set-up**.
+
+License
+-------
+zk-paillier is released under the terms of the GPL-3.0 license. See [LICENSE](LICENSE) for more information.
+
+Contact
+-------------------
+For any questions, feel free to [email us](mailto:github@kzencorp.com).
