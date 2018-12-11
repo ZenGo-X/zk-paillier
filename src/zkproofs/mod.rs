@@ -36,7 +36,7 @@ mod range_proof_ni;
 pub use self::range_proof_ni::RangeProofError;
 pub use self::range_proof_ni::RangeProofNi;
 mod equal_message_proof;
-
+pub use self::equal_message_proof::{NISigmaProof, Proof as EqualMessageProof, Statement, Witness};
 use curv::BigInt;
 use ring::digest::{Context, SHA256};
 use std::borrow::Borrow;

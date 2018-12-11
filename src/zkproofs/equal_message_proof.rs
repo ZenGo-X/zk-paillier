@@ -65,11 +65,6 @@ impl Error for ProofError {
 }
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct Challenge {
-    pub e: Vec<u8>,
-}
-
-#[derive(Clone, PartialEq, Debug)]
 pub struct Statement<'a> {
     pub c1: RawCiphertext<'a>,
     pub ek1: EncryptionKey,

@@ -15,7 +15,7 @@
 */
 use curv::BigInt;
 use paillier::arithimpl::traits::Samplable;
-use paillier::{EncryptWithChosenRandomness, EncryptionKey, Paillier, RawCiphertext};
+use paillier::{EncryptWithChosenRandomness, EncryptionKey, Paillier};
 use std::error::Error;
 use std::fmt;
 use zkproofs::range_proof::RangeProof;
