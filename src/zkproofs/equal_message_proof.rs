@@ -29,18 +29,22 @@ use std::fmt;
 Statement is C1, C2. Prover wants to prove knowledge of x,r1,r2 such that
 C1 = (1+N1)^x *r1^N1 mod N1^2 and C2 = (1+N2)^x *r2^N2 mod N2^2:
 
-prover first message: choose alpha, r3, r4, compute:
+prover first message: choose alpha, r3, r4, where 0<= alpha < min(N1,N2), 0<r3< N1, 0<r4< N2 compute:
 D1= (1+N1)^alpha *r3^N1 mod N1^2 and D2 = (1+N2)^alpha *r4^N2 mod N2^2,
 send D1,D2
 
 verifier sends a random challenge e
 
-prover computes: z1 = alpha + ex, s1 = r3r1^e, s2 = r4r2^e
-sends z1,s1,s2
+prover computes: z = alpha + ex, s1 = r3r1^e mod N1, s2 = r4r2^e mod N2
+sends z,s1,s2
 
 verifier checks:
-enc_N1(z1,s1) = C1^e*D1
-Enc_N2(z1,s2) = C2^e*D2
+Enc_N1(z1 mod N1, s1) = C1^e*D1
+Enc_N2(z1 mod N2, s2) = C2^e*D2
+
+The above protocol works for |alpha| >> |ex|
+
+
 */
 ///
 /// This is a non-interactive version of the proof, using Fiat Shamir Transform and assuming Random Oracle Model
