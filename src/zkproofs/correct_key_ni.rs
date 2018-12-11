@@ -30,6 +30,7 @@ const P: &str = "182418372624539346724764423130224413609353719905710421321355057
 const SALT_STRING: &[u8] = &[75, 90, 101, 110];
 const M2: usize = 11;
 const DIGEST_SIZE: usize = 256;
+#[derive(Debug)]
 pub struct CorrectKeyProofError;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NICorrectKeyProof {

@@ -49,22 +49,22 @@ impl Error for RangeProofError {
     }
 }
 
-pub struct RangeProofNi<'a> {
+pub struct RangeProofNi {
     ek: EncryptionKey,
     range: BigInt,
-    ciphertext: RawCiphertext<'a>,
+    ciphertext: BigInt,
     encrypted_pairs: EncryptedPairs,
     proof: Proof,
 }
 
-impl<'a> RangeProofNi<'a> {
+impl RangeProofNi {
     pub fn prove(
         ek: &EncryptionKey,
         range: &BigInt,
-        ciphertext: &'a RawCiphertext,
+        ciphertext: &BigInt,
         secret_x: &BigInt,
         secret_r: &BigInt,
-    ) -> RangeProofNi<'a> {
+    ) -> RangeProofNi {
         use super::RangeProof;
         let (encrypted_pairs, data_randomness_pairs) =
             RangeProof::generate_encrypted_pairs(ek, range);
@@ -90,11 +90,7 @@ impl<'a> RangeProofNi<'a> {
         }
     }
 
-    pub fn verify(
-        &self,
-        ek: &EncryptionKey,
-        ciphertext: &'a RawCiphertext,
-    ) -> Result<(), RangeProofError> {
+    pub fn verify(&self, ek: &EncryptionKey, ciphertext: &BigInt) -> Result<(), RangeProofError> {
         // make sure proof was done with the same public key
         assert_eq!(ek, &self.ek);
         // make sure proof was done with the same ciphertext
@@ -166,7 +162,7 @@ mod tests {
             &Randomness::from(&secret_r),
         );
 
-        RangeProofNi::prove(&ek, &range, &ciphertext, &secret_x, &secret_r);
+        RangeProofNi::prove(&ek, &range, &ciphertext.0, &secret_x, &secret_r);
     }
 
     #[test]
@@ -180,9 +176,9 @@ mod tests {
             RawPlaintext::from(&secret_x),
             &Randomness(secret_r.clone()),
         );
-        let range_proof = RangeProofNi::prove(&ek, &range, &cipher_x, &secret_x, &secret_r);
+        let range_proof = RangeProofNi::prove(&ek, &range, &cipher_x.0, &secret_x, &secret_r);
         range_proof
-            .verify(&ek, &cipher_x)
+            .verify(&ek, &cipher_x.0)
             .expect("range proof error");
     }
 
@@ -201,10 +197,10 @@ mod tests {
             RawPlaintext::from(&secret_x),
             &Randomness(secret_r.clone()),
         );
-        let range_proof = RangeProofNi::prove(&ek, &range, &cipher_x, &secret_x, &secret_r);
+        let range_proof = RangeProofNi::prove(&ek, &range, &cipher_x.0, &secret_x, &secret_r);
 
         range_proof
-            .verify(&ek, &cipher_x)
+            .verify(&ek, &cipher_x.0)
             .expect("range proof error");
     }
 
@@ -221,10 +217,10 @@ mod tests {
                 RawPlaintext::from(&secret_x),
                 &Randomness(secret_r.clone()),
             );
-            let range_proof = RangeProofNi::prove(&ek, &range, &cipher_x, &secret_x, &secret_r);
+            let range_proof = RangeProofNi::prove(&ek, &range, &cipher_x.0, &secret_x, &secret_r);
 
             range_proof
-                .verify(&ek, &cipher_x)
+                .verify(&ek, &cipher_x.0)
                 .expect("range proof error");
         });
     }

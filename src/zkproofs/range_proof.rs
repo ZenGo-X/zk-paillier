@@ -148,7 +148,7 @@ pub trait RangeProofTrait {
         encrypted_pairs: &EncryptedPairs,
         z: &Proof,
         range: &BigInt,
-        cipher_x: &RawCiphertext,
+        cipher_x: &BigInt,
     ) -> Result<(), CorrectKeyProofError>;
 }
 pub struct RangeProof;
@@ -296,8 +296,9 @@ impl RangeProofTrait for RangeProof {
         encrypted_pairs: &EncryptedPairs,
         proof: &Proof,
         range: &BigInt,
-        cipher_x: &RawCiphertext,
+        cipher_x: &BigInt,
     ) -> Result<(), CorrectKeyProofError> {
+        let cipher_x_raw = RawCiphertext::from(cipher_x);
         let range_scaled_third: BigInt = range.div_floor(&BigInt::from(3i32));
         let range_scaled_two_thirds: BigInt = BigInt::from(2i32) * &range_scaled_third;
 
@@ -363,9 +364,9 @@ impl RangeProofTrait for RangeProof {
                         let mut res = true;
 
                         let c = if *j == 1 {
-                            &encrypted_pairs.c1[i] * cipher_x.0.borrow() % &ek.nn
+                            &encrypted_pairs.c1[i] * cipher_x_raw.0.borrow() % &ek.nn
                         } else {
-                            &encrypted_pairs.c2[i] * cipher_x.0.borrow() % &ek.nn
+                            &encrypted_pairs.c2[i] * cipher_x_raw.0.borrow() % &ek.nn
                         };
 
                         let enc_zi = Paillier::encrypt_with_chosen_randomness(
@@ -506,7 +507,7 @@ mod tests {
         );
         // verifier:
         let result =
-            RangeProof::verifier_output(&ek, &e, &encrypted_pairs, &z_vector, &range, &cipher_x);
+            RangeProof::verifier_output(&ek, &e, &encrypted_pairs, &z_vector, &range, &cipher_x.0);
         assert!(result.is_ok());
     }
 
@@ -546,7 +547,7 @@ mod tests {
         );
         // verifier:
         let result =
-            RangeProof::verifier_output(&ek, &e, &encrypted_pairs, &z_vector, &range, &cipher_x);
+            RangeProof::verifier_output(&ek, &e, &encrypted_pairs, &z_vector, &range, &cipher_x.0);
         assert!(result.is_err());
     }
 
@@ -591,7 +592,7 @@ mod tests {
                 &encrypted_pairs,
                 &z_vector,
                 &range,
-                &cipher_x,
+                &cipher_x.0,
             );
         });
     }
