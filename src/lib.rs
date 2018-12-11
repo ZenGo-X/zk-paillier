@@ -28,6 +28,3 @@ extern crate serde_derive;
 extern crate serde_json;
 mod serialize;
 pub mod zkproofs;
-
-use serde::de::Deserialize;
-use serde::ser::Serialize;

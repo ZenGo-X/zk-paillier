@@ -18,7 +18,7 @@ use std::ops::Shl;
 
 use curv::BigInt;
 use paillier::arithimpl::traits::ModPow;
-use paillier::{extract_nroot, CorrectKeyProofError, DecryptionKey, EncryptionKey};
+use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
 // This protocol is based on the NIZK protocol in https://eprint.iacr.org/2018/057.pdf
 // for parameters = e = N, m2 = 11, alpha = 6379 see https://eprint.iacr.org/2018/987.pdf
@@ -30,7 +30,7 @@ const P: &str = "182418372624539346724764423130224413609353719905710421321355057
 const SALT_STRING: &[u8] = &[75, 90, 101, 110];
 const M2: usize = 11;
 const DIGEST_SIZE: usize = 256;
-
+pub struct CorrectKeyProofError;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NICorrectKeyProof {
     #[serde(with = "::serialize::vecbigint")]

@@ -19,14 +19,13 @@ pub use self::correct_opening::CorrectOpening;
 
 pub use self::correct_key::Challenge;
 pub use self::correct_key::CorrectKeyProof;
-pub use self::correct_key::CorrectKeyProofError;
 pub use self::correct_key::VerificationAid;
 mod correct_key;
 pub use self::correct_key::CorrectKey;
 
 mod correct_key_ni;
+pub use self::correct_key_ni::CorrectKeyProofError;
 pub use self::correct_key_ni::NICorrectKeyProof;
-
 mod range_proof;
 pub use self::range_proof::RangeProof;
 
@@ -34,8 +33,8 @@ pub use self::range_proof::ChallengeBits;
 pub use self::range_proof::EncryptedPairs;
 pub use self::range_proof::Proof;
 mod range_proof_ni;
-pub use self::range_proof_ni::RangeProofNi;
 pub use self::range_proof_ni::RangeProofError;
+pub use self::range_proof_ni::RangeProofNi;
 mod equal_message_proof;
 
 use curv::BigInt;
