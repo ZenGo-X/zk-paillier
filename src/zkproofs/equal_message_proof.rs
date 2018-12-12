@@ -80,9 +80,9 @@ pub struct Witness<'a> {
 }
 
 #[derive(PartialEq, Debug)]
-pub struct Proof<'a> {
-    d1: RawCiphertext<'a>,
-    d2: RawCiphertext<'a>,
+pub struct Proof {
+    d1: BigInt,
+    d2: BigInt,
     z1: BigInt,
     s1: Randomness,
     s2: Randomness,
@@ -94,8 +94,8 @@ pub trait NISigmaProof<T, W, S> {
     fn verify(&self, delta: &S) -> Result<(), ProofError>;
 }
 
-impl<'a> NISigmaProof<Proof<'a>, Witness<'a>, Statement<'a>> for Proof<'a> {
-    fn prove(w: &Witness, delta: &Statement) -> Proof<'a> {
+impl<'a> NISigmaProof<Proof, Witness<'a>, Statement<'a>> for Proof {
+    fn prove(w: &Witness, delta: &Statement) -> Proof {
         let r3 = BigInt::sample_below(&delta.ek1.n);
         let r4 = BigInt::sample_below(&delta.ek2.n);
         let min_n = BigInt::min(delta.ek1.n.clone(), delta.ek2.n.clone());
@@ -126,8 +126,8 @@ impl<'a> NISigmaProof<Proof<'a>, Witness<'a>, Statement<'a>> for Proof<'a> {
         let s1 = BigInt::modmul(&r3, &r1_e, &delta.ek1.n);
         let s2 = BigInt::modmul(&r4, &r2_e, &delta.ek2.n);
         Proof {
-            d1,
-            d2,
+            d1: d1.0.clone().into_owned(),
+            d2: d2.0.clone().into_owned(),
             z1,
             s1: Randomness::from(s1),
             s2: Randomness::from(s2),
@@ -140,8 +140,8 @@ impl<'a> NISigmaProof<Proof<'a>, Witness<'a>, Statement<'a>> for Proof<'a> {
         vec.push(delta.ek2.n.clone());
         vec.push(delta.c1.0.clone().into_owned());
         vec.push(delta.c2.0.clone().into_owned());
-        vec.push(self.d1.0.clone().into_owned());
-        vec.push(self.d2.0.clone().into_owned());
+        vec.push(self.d1.clone());
+        vec.push(self.d2.clone());
         let digest = super::compute_digest(vec.iter());
         let e_bn = BigInt::from(&digest[..]);
         let enc_n1 = Paillier::encrypt_with_chosen_randomness(
@@ -164,8 +164,8 @@ impl<'a> NISigmaProof<Proof<'a>, Witness<'a>, Statement<'a>> for Proof<'a> {
             delta.c2.clone(),
             RawPlaintext::from(&e_bn).clone(),
         );
-        let d1_c1_e = Paillier::add(&delta.ek1, c1_e, self.d1.clone());
-        let d2_c2_e = Paillier::add(&delta.ek2, c2_e, self.d2.clone());
+        let d1_c1_e = Paillier::add(&delta.ek1, c1_e, RawCiphertext::from(self.d1.clone()));
+        let d2_c2_e = Paillier::add(&delta.ek2, c2_e, RawCiphertext::from(self.d2.clone()));
 
         if d1_c1_e == enc_n1 && d2_c2_e == enc_n2 {
             Ok(())
