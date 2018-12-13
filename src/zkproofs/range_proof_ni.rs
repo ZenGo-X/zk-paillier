@@ -21,6 +21,8 @@ use std::fmt;
 use zkproofs::range_proof::RangeProof;
 use zkproofs::range_proof::RangeProofTrait;
 use zkproofs::range_proof::{ChallengeBits, EncryptedPairs, Proof};
+const SECURITY_PARAMETER: usize = 128;
+
 /// Zero-knowledge range proof that a value x<q/3 lies in interval [0,q].
 ///
 /// The verifier is given only c = ENC(ek,x).
@@ -56,6 +58,7 @@ pub struct RangeProofNi {
     ciphertext: BigInt,
     encrypted_pairs: EncryptedPairs,
     proof: Proof,
+    error_factor: usize,
 }
 
 impl RangeProofNi {
@@ -68,7 +71,7 @@ impl RangeProofNi {
     ) -> RangeProofNi {
         use super::RangeProof;
         let (encrypted_pairs, data_randomness_pairs) =
-            RangeProof::generate_encrypted_pairs(ek, range);
+            RangeProof::generate_encrypted_pairs(ek, range, SECURITY_PARAMETER);
         let (c1, c2) = (encrypted_pairs.c1, encrypted_pairs.c2); // TODO[Morten] fix temporary hack
 
         let mut vec: Vec<BigInt> = Vec::new();
@@ -77,10 +80,16 @@ impl RangeProofNi {
         vec.extend_from_slice(&c2);
         let e = ChallengeBits::from(super::compute_digest(vec.iter()));
 
-        //assuming digest length > STATISTICAL_ERROR_FACTOR
-
-        let proof =
-            RangeProof::generate_proof(ek, secret_x, secret_r, &e, range, &data_randomness_pairs);
+        //assuming digest length > error factor
+        let proof = RangeProof::generate_proof(
+            ek,
+            secret_x,
+            secret_r,
+            &e,
+            range,
+            &data_randomness_pairs,
+            SECURITY_PARAMETER,
+        );
 
         RangeProofNi {
             ek: ek.clone(),
@@ -88,6 +97,7 @@ impl RangeProofNi {
             ciphertext: ciphertext.clone(),
             encrypted_pairs: EncryptedPairs { c1, c2 },
             proof,
+            error_factor: SECURITY_PARAMETER,
         }
     }
 
@@ -108,6 +118,7 @@ impl RangeProofNi {
             &self.proof,
             &self.range,
             &self.ciphertext,
+            self.error_factor,
         );
         match result.is_ok() {
             true => Ok(()),
@@ -128,6 +139,7 @@ impl RangeProofNi {
             &self.proof,
             &self.range,
             &self.ciphertext,
+            self.error_factor.clone(),
         );
         match result.is_ok() {
             true => Ok(()),

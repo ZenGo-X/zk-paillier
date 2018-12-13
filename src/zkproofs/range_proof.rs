@@ -112,13 +112,14 @@ pub struct ChallengeRandomness(BigInt);
 ///
 /// /// This is an interactive version of the proof, assuming only DCRA which is alreasy assumed for Paillier cryptosystem security
 pub trait RangeProofTrait {
-    /// Verifier commits to a t-bit vector e where e is STATISTICAL_ERROR_FACTOR.
+    /// Verifier commits to a t-bit vector e where e size is STATISTICAL_ERROR_FACTOR.
     fn verifier_commit(ek: &EncryptionKey) -> (Commitment, ChallengeRandomness, ChallengeBits); // commitment is public
 
     /// Prover generates t random pairs, each pair encrypts a number in {q/3, 2q/3} and a number in {0, q/3}
     fn generate_encrypted_pairs(
         ek: &EncryptionKey,
         range: &BigInt,
+        error_factor: usize,
     ) -> (EncryptedPairs, DataRandomnessPairs);
 
     /// Verifier decommits to vector e.
@@ -139,6 +140,7 @@ pub trait RangeProofTrait {
         e: &ChallengeBits,
         range: &BigInt,
         data: &DataRandomnessPairs,
+        error_factor: usize,
     ) -> Proof;
 
     /// Verifier verifies the proof
@@ -149,6 +151,7 @@ pub trait RangeProofTrait {
         z: &Proof,
         range: &BigInt,
         cipher_x: &BigInt,
+        error_factor: usize,
     ) -> Result<(), CorrectKeyProofError>;
 }
 pub struct RangeProof;
@@ -167,11 +170,12 @@ impl RangeProofTrait for RangeProof {
     fn generate_encrypted_pairs(
         ek: &EncryptionKey,
         range: &BigInt,
+        error_factor: usize,
     ) -> (EncryptedPairs, DataRandomnessPairs) {
         let range_scaled_third = range.div_floor(&BigInt::from(3));
         let range_scaled_two_thirds = BigInt::from(2) * &range_scaled_third;
 
-        let mut w1: Vec<_> = (0..STATISTICAL_ERROR_FACTOR)
+        let mut w1: Vec<_> = (0..error_factor)
             .into_par_iter()
             .map(|_| BigInt::sample_range(&range_scaled_third, &range_scaled_two_thirds))
             .collect();
@@ -179,19 +183,19 @@ impl RangeProofTrait for RangeProof {
         let mut w2: Vec<_> = w1.par_iter().map(|x| x - &range_scaled_third).collect();
 
         // with probability 1/2 switch between w1i and w2i
-        for i in 0..STATISTICAL_ERROR_FACTOR {
+        for i in 0..error_factor {
             // TODO[Morten] need secure randomness?
             if random() {
                 mem::swap(&mut w2[i], &mut w1[i]);
             }
         }
 
-        let r1: Vec<_> = (0..STATISTICAL_ERROR_FACTOR)
+        let r1: Vec<_> = (0..error_factor)
             .into_par_iter()
             .map(|_| BigInt::sample_below(&ek.n))
             .collect();
 
-        let r2: Vec<_> = (0..STATISTICAL_ERROR_FACTOR)
+        let r2: Vec<_> = (0..error_factor)
             .into_par_iter()
             .map(|_| BigInt::sample_below(&ek.n))
             .collect();
@@ -252,11 +256,12 @@ impl RangeProofTrait for RangeProof {
         e: &ChallengeBits,
         range: &BigInt,
         data: &DataRandomnessPairs,
+        error_factor: usize,
     ) -> Proof {
         let range_scaled_third: BigInt = range.div_floor(&BigInt::from(3));
         let range_scaled_two_thirds = BigInt::from(2) * &range_scaled_third;
         let bits_of_e = BitVec::from_bytes(&e.0);
-        let reponses: Vec<_> = (0..STATISTICAL_ERROR_FACTOR)
+        let reponses: Vec<_> = (0..error_factor)
             .into_par_iter()
             .map(|i| {
                 let ei = bits_of_e[i];
@@ -297,6 +302,7 @@ impl RangeProofTrait for RangeProof {
         proof: &Proof,
         range: &BigInt,
         cipher_x: &BigInt,
+        error_factor: usize,
     ) -> Result<(), CorrectKeyProofError> {
         let cipher_x_raw = RawCiphertext::from(cipher_x);
         let range_scaled_third: BigInt = range.div_floor(&BigInt::from(3i32));
@@ -305,7 +311,7 @@ impl RangeProofTrait for RangeProof {
         let bits_of_e = BitVec::from_bytes(&e.0);
         let responses = &proof.0;
 
-        let verifications: Vec<bool> = (0..STATISTICAL_ERROR_FACTOR)
+        let verifications: Vec<bool> = (0..error_factor)
             .into_par_iter()
             .map(|i| {
                 let ei = bits_of_e[i];
@@ -430,7 +436,7 @@ mod tests {
     fn test_generate_encrypted_pairs() {
         let (ek, _dk) = test_keypair().keys();
         let range = BigInt::from(0xFFFFFFFFFFFFFi64);
-        RangeProof::generate_encrypted_pairs(&ek, &range);
+        RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
         //Paillier::verifier_commit();
     }
 
@@ -457,7 +463,7 @@ mod tests {
         let range = BigInt::from(0xFFFFFFFFFFFFFi64);
         let (_com, _r, e) = RangeProof::verifier_commit(&verifier_ek);
         let (_encrypted_pairs, data_and_randmoness_pairs) =
-            RangeProof::generate_encrypted_pairs(&ek, &range);
+            RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
         let secret_r = BigInt::sample_below(&ek.n);
         let secret_x = BigInt::from(0xFFFFFFFi64);
         let _z_vector = RangeProof::generate_proof(
@@ -467,6 +473,7 @@ mod tests {
             &e,
             &range,
             &data_and_randmoness_pairs,
+            STATISTICAL_ERROR_FACTOR,
         );
     }
 
@@ -485,7 +492,7 @@ mod tests {
         assert!(RangeProof::verify_commit(&verifier_ek, &com, &r, &e).is_ok());
         // prover:
         let (encrypted_pairs, data_and_randmoness_pairs) =
-            RangeProof::generate_encrypted_pairs(&ek, &range);
+            RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
         // prover:
         let secret_r = BigInt::sample_below(&ek.n);
         let secret_x = BigInt::sample_below(&range.div_floor(&BigInt::from(3)));
@@ -504,10 +511,18 @@ mod tests {
             &e,
             &range,
             &data_and_randmoness_pairs,
+            STATISTICAL_ERROR_FACTOR,
         );
         // verifier:
-        let result =
-            RangeProof::verifier_output(&ek, &e, &encrypted_pairs, &z_vector, &range, &cipher_x.0);
+        let result = RangeProof::verifier_output(
+            &ek,
+            &e,
+            &encrypted_pairs,
+            &z_vector,
+            &range,
+            &cipher_x.0,
+            STATISTICAL_ERROR_FACTOR,
+        );
         assert!(result.is_ok());
     }
 
@@ -522,7 +537,7 @@ mod tests {
         let (_com, _r, e) = RangeProof::verifier_commit(&verifier_ek);
         // prover:
         let (encrypted_pairs, data_and_randmoness_pairs) =
-            RangeProof::generate_encrypted_pairs(&ek, &range);
+            RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
         // prover:
         let secret_r = BigInt::sample_below(&ek.n);
         let secret_x = BigInt::sample_range(
@@ -544,10 +559,18 @@ mod tests {
             &e,
             &range,
             &data_and_randmoness_pairs,
+            STATISTICAL_ERROR_FACTOR,
         );
         // verifier:
-        let result =
-            RangeProof::verifier_output(&ek, &e, &encrypted_pairs, &z_vector, &range, &cipher_x.0);
+        let result = RangeProof::verifier_output(
+            &ek,
+            &e,
+            &encrypted_pairs,
+            &z_vector,
+            &range,
+            &cipher_x.0,
+            STATISTICAL_ERROR_FACTOR,
+        );
         assert!(result.is_err());
     }
 
@@ -564,7 +587,7 @@ mod tests {
             let (_com, _r, e) = RangeProof::verifier_commit(&verifier_ek);
             // prover:
             let (encrypted_pairs, data_and_randmoness_pairs) =
-                RangeProof::generate_encrypted_pairs(&ek, &range);
+                RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
             // prover:
             let secret_r = BigInt::sample_below(&ek.n);
             let secret_x = BigInt::sample_below(&range.div_floor(&BigInt::from(3)));
@@ -584,6 +607,7 @@ mod tests {
                 &e,
                 &range,
                 &data_and_randmoness_pairs,
+                STATISTICAL_ERROR_FACTOR,
             );
             // verifier:
             let _result = RangeProof::verifier_output(
@@ -593,6 +617,7 @@ mod tests {
                 &z_vector,
                 &range,
                 &cipher_x.0,
+                STATISTICAL_ERROR_FACTOR,
             );
         });
     }
