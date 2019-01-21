@@ -32,7 +32,7 @@ const M2: usize = 11;
 const DIGEST_SIZE: usize = 256;
 #[derive(Debug)]
 pub struct CorrectKeyProofError;
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NICorrectKeyProof {
     #[serde(with = "::serialize::vecbigint")]
     pub sigma_vec: Vec<BigInt>,
