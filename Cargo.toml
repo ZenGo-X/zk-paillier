@@ -28,6 +28,7 @@ serde_json = "1.0"
 [dependencies.curv]
 git = "https://github.com/KZen-networks/curv"
 features =  ["curvesecp256k1"]
+branch = "des"
 
 
 [patch.crates-io]
