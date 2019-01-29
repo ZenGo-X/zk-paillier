@@ -39,8 +39,9 @@ prover computes: z = alpha + ex, s1 = r3r1^e mod N1, s2 = r4r2^e mod N2
 sends z,s1,s2
 
 verifier checks:
-Enc_N1(z1 mod N1, s1) = C1^e*D1
-Enc_N2(z1 mod N2, s2) = C2^e*D2
+z1 < 2 * max(N1,N2)
+Enc_N1(z1 mod N1, s1) == C1^e*D1
+Enc_N2(z1 mod N2, s2) == C2^e*D2
 
 The above protocol works for |alpha| >> |ex|
 
@@ -135,6 +136,8 @@ impl<'a> NISigmaProof<Proof, Witness<'a>, Statement<'a>> for Proof {
     }
 
     fn verify(&self, delta: &Statement) -> Result<(), ProofError> {
+        assert!(self.z1 < BigInt::from(2) * BigInt::max(delta.ek1.n.clone(), delta.ek2.n.clone()));
+
         let mut vec: Vec<BigInt> = Vec::new();
         vec.push(delta.ek1.n.clone());
         vec.push(delta.ek2.n.clone());
@@ -142,6 +145,7 @@ impl<'a> NISigmaProof<Proof, Witness<'a>, Statement<'a>> for Proof {
         vec.push(delta.c2.0.clone().into_owned());
         vec.push(self.d1.clone());
         vec.push(self.d2.clone());
+
         let digest = super::compute_digest(vec.iter());
         let e_bn = BigInt::from(&digest[..]);
         let enc_n1 = Paillier::encrypt_with_chosen_randomness(
@@ -166,7 +170,6 @@ impl<'a> NISigmaProof<Proof, Witness<'a>, Statement<'a>> for Proof {
         );
         let d1_c1_e = Paillier::add(&delta.ek1, c1_e, RawCiphertext::from(self.d1.clone()));
         let d2_c2_e = Paillier::add(&delta.ek2, c2_e, RawCiphertext::from(self.d2.clone()));
-
         if d1_c1_e == enc_n1 && d2_c2_e == enc_n2 {
             Ok(())
         } else {
@@ -186,8 +189,7 @@ mod tests {
     fn test_equal_message_zk_proof() {
         let (ek1, _dk1) = Paillier::keypair().keys();
         let (ek2, _dk2) = Paillier::keypair().keys();
-        let min_n = BigInt::min(ek1.n.clone(), ek2.n.clone());
-        let x = BigInt::sample_below(&min_n);
+        let x = BigInt::sample(256);
         let r1 = BigInt::sample_below(&ek1.n);
         let r2 = BigInt::sample_below(&ek2.n);
         let w = Witness {
@@ -209,4 +211,5 @@ mod tests {
         let proof = Proof::prove(&w, &delta);
         assert!(proof.verify(&delta).is_ok());
     }
+
 }
