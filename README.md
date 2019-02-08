@@ -11,7 +11,6 @@ Currently implemented proofs
 * non-interactive proof of correct paillier keypair generation
 * range proof that a paillier ciphertext lies in interval [0,q]
 * non-interactive range proof that a paillier ciphertext lies in interval [0,q]
-* non-interacrive roof that two paillier ciphertext are encrypting the same message under two different keys
 * proof of correct opening of a ciphertext
 
 Usage
