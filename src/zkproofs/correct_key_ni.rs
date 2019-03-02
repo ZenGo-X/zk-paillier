@@ -21,7 +21,7 @@ use paillier::arithimpl::traits::ModPow;
 use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
 // This protocol is based on the NIZK protocol in https://eprint.iacr.org/2018/057.pdf
-// for parameters = e = N, m2 = 11, alpha = 6379 see https://eprint.iacr.org/2018/987.pdf
+// for parameters = e = N, m2 = 11, alpha = 6379 see https://eprint.iacr.org/2018/987.pdf 6.2.3
 // for full details.
 
 // product of all primes < alpha: https://www.dcode.fr/primorial
