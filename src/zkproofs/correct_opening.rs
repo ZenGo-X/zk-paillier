@@ -13,7 +13,7 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
-use paillier::traits::*;
+
 use paillier::{EncryptWithChosenRandomness, EncryptionKey, Paillier, RawPlaintext};
 
 /// Verify correct opening of ciphertext.
@@ -37,7 +37,9 @@ mod tests {
 
     use super::*;
     use curv::BigInt;
+    use paillier::Encrypt;
     use paillier::Keypair;
+    use paillier::Open;
 
     fn test_keypair() -> Keypair {
         let p = str::parse("148677972634832330983979593310074301486537017973460461278300587514468301043894574906886127642530475786889672304776052879927627556769456140664043088700743909632312483413393134504352834240399191134336344285483935856491230340093391784574980688823380828143810804684752914935441384845195613674104960646037368551517").unwrap();

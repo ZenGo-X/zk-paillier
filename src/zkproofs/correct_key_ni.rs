@@ -16,8 +16,8 @@
 use std::iter;
 use std::ops::Shl;
 
+use curv::arithmetic::traits::*;
 use curv::BigInt;
-use paillier::arithimpl::traits::ModPow;
 use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
 // This protocol is based on the NIZK protocol in https://eprint.iacr.org/2018/057.pdf
@@ -40,7 +40,8 @@ pub struct NICorrectKeyProof {
 
 impl NICorrectKeyProof {
     pub fn proof(dk: &DecryptionKey) -> NICorrectKeyProof {
-        let key_length = &dk.n.bit_length();
+        let dk_n = &dk.q * &dk.p;
+        let key_length = &dk_n.bit_length();
 
         let salt_bn = BigInt::from(SALT_STRING);
 
@@ -48,12 +49,12 @@ impl NICorrectKeyProof {
         let rho_vec = (0..M2)
             .map(|i| {
                 let seed = super::compute_digest(
-                    iter::once(&dk.n)
+                    iter::once(&dk_n)
                         .chain(iter::once(&salt_bn))
                         .chain(iter::once(&BigInt::from(i.clone() as u32))),
                 );
                 let seed_bn = BigInt::from(&seed[..]);
-                mask_generation(&key_length, &seed_bn) % &dk.n
+                mask_generation(&key_length, &seed_bn) % &dk_n
             })
             .collect::<Vec<BigInt>>();
 
@@ -87,7 +88,7 @@ impl NICorrectKeyProof {
 
         let derived_rho_vec = (0..M2)
             .into_par_iter()
-            .map(|i| BigInt::modpow(&self.sigma_vec[i], &ek.n, &ek.n))
+            .map(|i| BigInt::mod_pow(&self.sigma_vec[i], &ek.n, &ek.n))
             .collect::<Vec<BigInt>>();
 
         if rho_vec == derived_rho_vec && gcd_test == BigInt::one() {

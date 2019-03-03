@@ -23,11 +23,12 @@ use rayon::prelude::*;
 use ring::digest::{Context, SHA256};
 
 use curv::BigInt;
-use paillier::traits::*;
+use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
 use zkproofs::correct_key::CorrectKeyTrait;
 use zkproofs::CorrectKeyProofError;
+
 const STATISTICAL_ERROR_FACTOR: usize = 40;
 
 #[derive(Default, Debug, Serialize, Deserialize)]

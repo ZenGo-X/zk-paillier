@@ -18,10 +18,8 @@ use std::error::Error;
 use std::fmt;
 use std::iter;
 
-use curv::arithmetic::traits::Samplable;
+use curv::arithmetic::traits::*;
 use curv::BigInt;
-use paillier::arithimpl::traits::ModPow;
-use paillier::arithimpl::traits::EGCD;
 use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
 use ring::digest::{Context, SHA256};
@@ -100,7 +98,7 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
 
         let sn: Vec<_> = s
             .par_iter()
-            .map(|si| BigInt::modpow(si, &ek.n, &ek.n))
+            .map(|si| BigInt::mod_pow(si, &ek.n, &ek.n))
             .collect();
 
         // Compute non-interactive proof of knowledge of the n-roots in the above
@@ -113,7 +111,7 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
 
         let rn: Vec<_> = r
             .par_iter()
-            .map(|ri| BigInt::modpow(ri, &ek.n, &ek.n))
+            .map(|ri| BigInt::mod_pow(ri, &ek.n, &ek.n))
             .collect();
 
         let e = compute_digest(iter::once(&ek.n).chain(&sn).chain(&rn));
@@ -121,7 +119,7 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
         let z: Vec<_> = r
             .par_iter()
             .zip(s.par_iter())
-            .map(|(ri, si)| (ri * BigInt::modpow(si, &e, &ek.n)) % &ek.n)
+            .map(|(ri, si)| (ri * BigInt::mod_pow(si, &e, &ek.n)) % &ek.n)
             .collect();
 
         // Compute expected result for equality test in verification
@@ -135,19 +133,19 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
         challenge: &Challenge,
     ) -> Result<CorrectKeyProof, CorrectKeyProofError> {
         let mut fail = false; // !!! Do not change
-
+        let dk_n = &dk.q * &dk.p;
         // check sn co-prime with n
         fail = challenge
             .sn
             .par_iter()
-            .any(|sni| BigInt::egcd(&dk.n, sni).0 != BigInt::one())
+            .any(|sni| BigInt::egcd(&dk_n, sni).0 != BigInt::one())
             || fail;
 
         // check z co-prime with n
         fail = challenge
             .z
             .par_iter()
-            .any(|zi| BigInt::egcd(&dk.n, zi).0 != BigInt::one())
+            .any(|zi| BigInt::egcd(&dk_n, zi).0 != BigInt::one())
             || fail;
 
         // reconstruct rn
@@ -159,20 +157,20 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
             .par_iter()
             .zip(challenge.sn.par_iter())
             .map(|(zi, sni)| {
-                let zn = BigInt::modpow(zi, &dk.n, &dk.n);
-                let snphi = BigInt::modpow(sni, &phimine, &dk.n);
-                (zn * snphi) % &dk.n
+                let zn = BigInt::mod_pow(zi, &dk_n, &dk_n);
+                let snphi = BigInt::mod_pow(sni, &phimine, &dk_n);
+                (zn * snphi) % &dk_n
             })
             .collect();
 
         // check rn co-prime with n
         fail = rn
             .par_iter()
-            .any(|rni| BigInt::egcd(&dk.n, rni).0 != BigInt::one())
+            .any(|rni| BigInt::egcd(&dk_n, rni).0 != BigInt::one())
             || fail;
 
         // check that e was computed correctly
-        let e = compute_digest(iter::once(&dk.n).chain(&challenge.sn).chain(&rn));
+        let e = compute_digest(iter::once(&dk_n).chain(&challenge.sn).chain(&rn));
         fail = (challenge.e != e) || fail;
 
         if fail {

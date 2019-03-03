@@ -13,8 +13,8 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
+use curv::arithmetic::traits::Samplable;
 use curv::BigInt;
-use paillier::arithimpl::traits::Samplable;
 use paillier::{EncryptWithChosenRandomness, EncryptionKey, Paillier};
 use std::error::Error;
 use std::fmt;
@@ -22,7 +22,6 @@ use zkproofs::range_proof::RangeProof;
 use zkproofs::range_proof::RangeProofTrait;
 use zkproofs::range_proof::{ChallengeBits, EncryptedPairs, Proof};
 const SECURITY_PARAMETER: usize = 128;
-
 /// Zero-knowledge range proof that a value x<q/3 lies in interval [0,q].
 ///
 /// The verifier is given only c = ENC(ek,x).
