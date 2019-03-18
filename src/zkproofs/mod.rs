@@ -6,7 +6,7 @@
     This file is part of Multisig Schnorr library
     (https://github.com/KZen-networks/multisig-schnorr)
 
-    Multisig Schnorr is free software: you can redistribute
+    zk-paillier is free software: you can redistribute
     it and/or modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation, either
     version 3 of the License, or (at your option) any later version.
@@ -35,6 +35,11 @@ pub use self::range_proof::Proof;
 mod range_proof_ni;
 pub use self::range_proof_ni::RangeProofError;
 pub use self::range_proof_ni::RangeProofNi;
+
+mod correct_message;
+pub use self::correct_message::CorrectMessageProof;
+pub use self::correct_message::CorrectMessageProofError;
+
 use curv::BigInt;
 use ring::digest::{Context, SHA256};
 use std::borrow::Borrow;
