@@ -12,6 +12,7 @@ Currently implemented proofs
 * range proof that a paillier ciphertext lies in interval [0,q]
 * non-interactive range proof that a paillier ciphertext lies in interval [0,q]
 * proof of correct opening of a ciphertext
+* proof that a ciphertext encrypts a message from a given message space
 
 Usage
 -------------------
