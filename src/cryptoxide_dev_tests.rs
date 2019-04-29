@@ -115,7 +115,7 @@ mod tests {
         use cryptoxide::sha2::Sha256;
         use std::iter::repeat;
 
-        // create a SHA3-256 object
+        // create a SHA2-256 object
         let mut hasher = Sha256::new();
 
         // write input message
