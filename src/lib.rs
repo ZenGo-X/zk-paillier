@@ -28,3 +28,8 @@ extern crate serde_derive;
 extern crate serde_json;
 mod serialize;
 pub mod zkproofs;
+
+#[cfg(test)] 
+pub mod cryptoxide_dev_tests;
+#[cfg(test)] 
+extern crate cryptoxide;
