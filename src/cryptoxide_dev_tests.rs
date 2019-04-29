@@ -271,13 +271,6 @@ mod tests {
             s_ctx.update(part.as_bytes());
         }
         let signature = s_ctx.sign();
-        // The receiver (somehow!) knows the key value, and uses it to verify the
-        // integrity of the message.
-        //let v_key = hmac::VerificationKey::new(&SHA256, key_value.as_ref());
-        let mut msg = Vec::<u8>::new();
-        for part in &parts {
-            msg.extend(part.as_bytes());
-        }
 
         assert_eq!(
             SHA256_SIGNATURE_RESULT_FORMATED_STRING,
