@@ -25,7 +25,7 @@ mod tests {
         use cryptoxide::digest::Digest;
         use cryptoxide::sha2::Sha256;
 
-        // create a SHA3-256 object
+        // create a SHA2-256 object
         let mut hasher = Sha256::new();
 
         // write input message
@@ -59,7 +59,7 @@ mod tests {
         use cryptoxide::digest::Digest;
         use cryptoxide::sha2::Sha256;
 
-        // create a SHA3-256 object
+        // create a SHA2-256 object
         let mut hasher = Sha256::new();
 
         let mut flatten_array: Vec<u8> = Vec::new();
@@ -172,7 +172,7 @@ mod tests {
         use cryptoxide::digest::Digest;
         use cryptoxide::sha2::Sha256;
 
-        // create a SHA3-256 object
+        // create a SHA2-256 object
         let mut hasher = Sha256::new();
 
         // write input message
