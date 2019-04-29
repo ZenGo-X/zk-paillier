@@ -24,7 +24,6 @@ mod tests {
     fn compute_digest_replace(bytes: &[u8]) -> BigInt {
         use cryptoxide::digest::Digest;
         use cryptoxide::sha2::Sha256;
-        use std::iter::repeat;
 
         // create a SHA3-256 object
         let mut hasher = Sha256::new();
@@ -32,7 +31,7 @@ mod tests {
         // write input message
         hasher.input(bytes);
 
-        let mut vect_result: Vec<u8> = repeat(0u8).take(32).collect(); //TODO: need some sane way of creating &mut [u8]
+        let mut vect_result = [0; 32];
         hasher.result(&mut vect_result);
         BigInt::from(vect_result.as_ref())
     }
@@ -59,7 +58,6 @@ mod tests {
     {
         use cryptoxide::digest::Digest;
         use cryptoxide::sha2::Sha256;
-        use std::iter::repeat;
 
         // create a SHA3-256 object
         let mut hasher = Sha256::new();
@@ -67,7 +65,6 @@ mod tests {
         let mut flatten_array: Vec<u8> = Vec::new();
         for value in values {
             let bytes: Vec<u8> = value.borrow().into();
-            //hasher.update(&bytes);
             flatten_array.extend_from_slice(&bytes);
         }
 
@@ -82,9 +79,9 @@ mod tests {
 
 
         hasher.input(&flatten_array);
-        let mut vect_result: Vec<u8> = repeat(0u8).take(32).collect(); //TODO: need some sane way of creating &mut [u8]
-        hasher.result(&mut vect_result);
-        return vect_result;
+        let mut result = [0; 32];
+        hasher.result(&mut result);
+        return result.to_vec();
     }
 
     //tests
@@ -113,7 +110,6 @@ mod tests {
     fn test_cryptoxide_nomod_byte_res() {
         use cryptoxide::digest::Digest;
         use cryptoxide::sha2::Sha256;
-        use std::iter::repeat;
 
         // create a SHA2-256 object
         let mut hasher = Sha256::new();
@@ -121,18 +117,19 @@ mod tests {
         // write input message
         hasher.input(EXAMPLE_STRING.as_bytes());
 
-        let expected: Vec<u8> = test::from_hex(EXPECTED_HEX).unwrap();
+        let expected_vec = test::from_hex(EXPECTED_HEX).unwrap();
+        let expected = expected_vec.as_ref();
 
         let result_str = hasher.result_str();
         assert_eq!(result_str, EXPECTED_HEX);
 
-        let mut result: Vec<u8> = repeat(0u8).take(32).collect(); //TODO: need some sane way of creating &mut [u8]
+        let mut result = [0; 32];
         hasher.result(&mut result);
         let result_bigint = BigInt::from(result.as_ref());
 
         assert_eq!(result, expected);
 
-        assert_eq!(result_bigint, BigInt::from(expected.as_ref()));
+        assert_eq!(result_bigint, BigInt::from(expected));
     }
 
     #[test]
@@ -174,7 +171,6 @@ mod tests {
     fn test_cryptoxide_replace() {
         use cryptoxide::digest::Digest;
         use cryptoxide::sha2::Sha256;
-        use std::iter::repeat;
 
         // create a SHA3-256 object
         let mut hasher = Sha256::new();
@@ -203,7 +199,7 @@ mod tests {
         let multi_part = ctx.finish();
 
         let one_shot_res = one_shot.as_ref();
-        let mut buf_crtxd_res: Vec<u8> = repeat(0u8).take(32).collect(); //TODO: need some sane way of creating &mut [u8]
+        let mut buf_crtxd_res = [0; 32];
         hasher.result(&mut buf_crtxd_res);
 
         assert_eq!(&one_shot_res, &multi_part.as_ref());
