@@ -19,7 +19,8 @@ extern crate curv;
 extern crate paillier;
 extern crate rand;
 extern crate rayon;
-extern crate ring;
+//extern crate ring;
+extern crate cryptoxide;
 extern crate serde;
 extern crate test;
 
@@ -28,8 +29,3 @@ extern crate serde_derive;
 extern crate serde_json;
 mod serialize;
 pub mod zkproofs;
-
-#[cfg(test)] 
-pub mod cryptoxide_dev_tests;
-#[cfg(test)] 
-extern crate cryptoxide;

@@ -22,7 +22,10 @@ use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
-use ring::digest::{Context, SHA256};
+//use ring::digest::{Context, SHA256};
+use cryptoxide::digest::Digest;
+use cryptoxide::sha2::Sha256;
+
 const STATISTICAL_ERROR_FACTOR: usize = 40;
 
 // TODO: generalize the error string and move the struct to a common location where all other proofs can use it as well
@@ -202,12 +205,27 @@ where
     IT: Iterator,
     IT::Item: Borrow<BigInt>,
 {
+    /*
     let mut digest = Context::new(&SHA256);
     for value in values {
         let bytes: Vec<u8> = value.borrow().into();
         digest.update(&bytes);
     }
     BigInt::from(digest.finish().as_ref())
+    */
+
+    let mut hasher = Sha256::new();
+
+    let mut flatten_array: Vec<u8> = Vec::new();
+    for value in values {
+        let bytes: Vec<u8> = value.borrow().into();
+        flatten_array.extend_from_slice(&bytes);
+    }
+
+    hasher.input(&flatten_array);
+    let mut result = [0; 32];
+    hasher.result(&mut result);
+    BigInt::from(result.as_ref())
 }
 
 #[cfg(test)]

@@ -16,18 +16,21 @@ categories = ["cryptography"]
 crate-type = ["lib"]
 
 [dependencies]
-paillier = { git = "https://github.com/KZen-networks/rust-paillier"}
-ring = "0.13"
+# paillier = { git = "https://github.com/KZen-networks/rust-paillier"}
+paillier = { git = "https://github.com/vhnatyk/rust-paillier", branch = "vhnat/mpecdsa-core" }
+# ring = "0.13"
+cryptoxide = "0.1.1"
 rand = "0.5"
 rayon = "1.0"
 bit-vec = "0.5"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
+curv = { version = "0.1.0", features = ["ec_secp256k1"], git = "https://github.com/vhnatyk/curv", branch="vhnat/mpecdsa_core_extraction" }
 
-[dependencies.curv]
-git = "https://github.com/KZen-networks/curv"
-branch = "known_issues"
+# [dependencies.curv]
+# git = "https://github.com/KZen-networks/curv"
+# branch = "known_issues"
 
 
 
@@ -36,4 +39,3 @@ rust-gmp = { version = "0.5.0", features = ["serde_support"], git = "https://git
 
 [dev-dependencies]
 criterion = "0.2"
-cryptoxide = "0.1.1"

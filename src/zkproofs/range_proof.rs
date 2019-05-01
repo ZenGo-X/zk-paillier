@@ -20,7 +20,9 @@ use std::mem;
 use bit_vec::BitVec;
 use rand::prelude::*;
 use rayon::prelude::*;
-use ring::digest::{Context, SHA256};
+//use ring::digest::{Context, SHA256};
+use cryptoxide::digest::Digest;
+use cryptoxide::sha2::Sha256;
 
 use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
@@ -412,9 +414,19 @@ fn get_paillier_commitment(ek: &EncryptionKey, x: &BigInt, r: &BigInt) -> BigInt
 }
 
 fn compute_digest(bytes: &[u8]) -> BigInt {
+    /*
     let mut digest = Context::new(&SHA256);
     digest.update(&bytes);
     BigInt::from(digest.finish().as_ref())
+    */
+
+    let mut hasher = Sha256::new();
+
+    hasher.input(bytes);
+
+    let mut vect_result = [0; 32];
+    hasher.result(&mut vect_result);
+    BigInt::from(vect_result.as_ref())
 }
 
 #[cfg(test)]
