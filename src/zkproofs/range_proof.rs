@@ -414,12 +414,6 @@ fn get_paillier_commitment(ek: &EncryptionKey, x: &BigInt, r: &BigInt) -> BigInt
 }
 
 fn compute_digest(bytes: &[u8]) -> BigInt {
-    /*
-    let mut digest = Context::new(&SHA256);
-    digest.update(&bytes);
-    BigInt::from(digest.finish().as_ref())
-    */
-
     let mut hasher = Sha256::new();
 
     hasher.input(bytes);

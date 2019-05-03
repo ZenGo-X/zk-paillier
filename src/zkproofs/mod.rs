@@ -51,23 +51,13 @@ where
     IT: Iterator,
     IT::Item: Borrow<BigInt>,
 {
-    /*
-    let mut digest = Context::new(&SHA256);
-    for value in values {
-        let bytes: Vec<u8> = value.borrow().into();
-        digest.update(&bytes);
-    }
-    digest.finish().as_ref().into()
-    */
     let mut hasher = Sha256::new();
 
-    let mut flatten_array: Vec<u8> = Vec::new();
     for value in values {
         let bytes: Vec<u8> = value.borrow().into();
-        flatten_array.extend_from_slice(&bytes);
+        hasher.input(&bytes);
     }
 
-    hasher.input(&flatten_array);
     let mut result = [0; 32];
     hasher.result(&mut result);
     return result.to_vec();
