@@ -14,13 +14,14 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
 use curv::arithmetic::traits::Samplable;
+use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+use curv::cryptographic_primitives::hashing::traits::Hash;
 use std::borrow::Borrow;
 use std::mem;
 
 use bit_vec::BitVec;
 use rand::prelude::*;
 use rayon::prelude::*;
-use ring::digest::{Context, SHA256};
 
 use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
@@ -412,9 +413,8 @@ fn get_paillier_commitment(ek: &EncryptionKey, x: &BigInt, r: &BigInt) -> BigInt
 }
 
 fn compute_digest(bytes: &[u8]) -> BigInt {
-    let mut digest = Context::new(&SHA256);
-    digest.update(&bytes);
-    BigInt::from(digest.finish().as_ref())
+    let input = BigInt::from(bytes);
+    HSha256::create_hash(&vec![&input])
 }
 
 #[cfg(test)]

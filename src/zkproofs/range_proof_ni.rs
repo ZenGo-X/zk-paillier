@@ -13,6 +13,7 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
+use curv::arithmetic::traits::Converter;
 use curv::arithmetic::traits::Samplable;
 use curv::BigInt;
 use paillier::{EncryptWithChosenRandomness, EncryptionKey, Paillier};
@@ -77,7 +78,7 @@ impl RangeProofNi {
         vec.push(ek.n.clone());
         vec.extend_from_slice(&c1);
         vec.extend_from_slice(&c2);
-        let e = ChallengeBits::from(super::compute_digest(vec.iter()));
+        let e = ChallengeBits::from(BigInt::to_vec(&super::compute_digest(vec.iter())));
 
         //assuming digest length > error factor
         let proof = RangeProof::generate_proof(
@@ -109,7 +110,7 @@ impl RangeProofNi {
         vec.push(ek.n.clone());
         vec.extend_from_slice(&self.encrypted_pairs.c1);
         vec.extend_from_slice(&self.encrypted_pairs.c2);
-        let e = ChallengeBits::from(super::compute_digest(vec.iter()));
+        let e = ChallengeBits::from(BigInt::to_vec(&super::compute_digest(vec.iter())));
         let result = RangeProof::verifier_output(
             ek,
             &e,
@@ -130,7 +131,7 @@ impl RangeProofNi {
         vec.push(self.ek.n.clone());
         vec.extend_from_slice(&self.encrypted_pairs.c1);
         vec.extend_from_slice(&self.encrypted_pairs.c2);
-        let e = ChallengeBits::from(super::compute_digest(vec.iter()));
+        let e = ChallengeBits::from(BigInt::to_vec(&super::compute_digest(vec.iter())));
         let result = RangeProof::verifier_output(
             &self.ek,
             &e,
