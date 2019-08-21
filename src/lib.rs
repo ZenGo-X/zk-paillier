@@ -1,4 +1,3 @@
-#![feature(test)]
 /*
     zk-paillier
 
@@ -22,7 +21,6 @@ extern crate paillier;
 extern crate rand;
 extern crate rayon;
 extern crate serde;
-extern crate test;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
