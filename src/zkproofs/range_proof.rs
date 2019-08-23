@@ -14,19 +14,19 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
 use curv::arithmetic::traits::Samplable;
+use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+use curv::cryptographic_primitives::hashing::traits::Hash;
 use std::borrow::Borrow;
 use std::mem;
 
 use bit_vec::BitVec;
 use rand::prelude::*;
 use rayon::prelude::*;
-use ring::digest::{Context, SHA256};
 
 use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
-use zkproofs::correct_key::CorrectKeyTrait;
 use zkproofs::CorrectKeyProofError;
 
 const STATISTICAL_ERROR_FACTOR: usize = 40;
@@ -412,9 +412,8 @@ fn get_paillier_commitment(ek: &EncryptionKey, x: &BigInt, r: &BigInt) -> BigInt
 }
 
 fn compute_digest(bytes: &[u8]) -> BigInt {
-    let mut digest = Context::new(&SHA256);
-    digest.update(&bytes);
-    BigInt::from(digest.finish().as_ref())
+    let input = BigInt::from(bytes);
+    HSha256::create_hash(&vec![&input])
 }
 
 #[cfg(test)]
@@ -422,6 +421,7 @@ mod tests {
     const RANGE_BITS: usize = 256; //for elliptic curves with 256bits for example
 
     use test::Bencher;
+    use zkproofs::correct_key::CorrectKeyTrait;
 
     use super::*;
     use paillier::{Keypair, Randomness};

@@ -13,9 +13,9 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
-use curv::arithmetic::traits::Samplable;
+use curv::arithmetic::traits::Converter;
 use curv::BigInt;
-use paillier::{EncryptWithChosenRandomness, EncryptionKey, Paillier};
+use paillier::EncryptionKey;
 use std::error::Error;
 use std::fmt;
 use zkproofs::range_proof::RangeProof;
@@ -68,7 +68,6 @@ impl RangeProofNi {
         secret_x: &BigInt,
         secret_r: &BigInt,
     ) -> RangeProofNi {
-        use super::RangeProof;
         let (encrypted_pairs, data_randomness_pairs) =
             RangeProof::generate_encrypted_pairs(ek, range, SECURITY_PARAMETER);
         let (c1, c2) = (encrypted_pairs.c1, encrypted_pairs.c2); // TODO[Morten] fix temporary hack
@@ -77,7 +76,7 @@ impl RangeProofNi {
         vec.push(ek.n.clone());
         vec.extend_from_slice(&c1);
         vec.extend_from_slice(&c2);
-        let e = ChallengeBits::from(super::compute_digest(vec.iter()));
+        let e = ChallengeBits::from(BigInt::to_vec(&super::compute_digest(vec.iter())));
 
         //assuming digest length > error factor
         let proof = RangeProof::generate_proof(
@@ -109,7 +108,7 @@ impl RangeProofNi {
         vec.push(ek.n.clone());
         vec.extend_from_slice(&self.encrypted_pairs.c1);
         vec.extend_from_slice(&self.encrypted_pairs.c2);
-        let e = ChallengeBits::from(super::compute_digest(vec.iter()));
+        let e = ChallengeBits::from(BigInt::to_vec(&super::compute_digest(vec.iter())));
         let result = RangeProof::verifier_output(
             ek,
             &e,
@@ -130,7 +129,7 @@ impl RangeProofNi {
         vec.push(self.ek.n.clone());
         vec.extend_from_slice(&self.encrypted_pairs.c1);
         vec.extend_from_slice(&self.encrypted_pairs.c2);
-        let e = ChallengeBits::from(super::compute_digest(vec.iter()));
+        let e = ChallengeBits::from(BigInt::to_vec(&super::compute_digest(vec.iter())));
         let result = RangeProof::verifier_output(
             &self.ek,
             &e,
@@ -153,9 +152,11 @@ mod tests {
 
     use super::RangeProofNi;
     use super::*;
+    use curv::arithmetic::traits::Samplable;
+    use paillier::EncryptWithChosenRandomness;
+    use paillier::Paillier;
     use paillier::{Keypair, Randomness, RawPlaintext};
     use test::Bencher;
-
     fn test_keypair() -> Keypair {
         let p = str::parse("148677972634832330983979593310074301486537017973460461278300587514468301043894574906886127642530475786889672304776052879927627556769456140664043088700743909632312483413393134504352834240399191134336344285483935856491230340093391784574980688823380828143810804684752914935441384845195613674104960646037368551517").unwrap();
         let q = str::parse("158741574437007245654463598139927898730476924736461654463975966787719309357536545869203069369466212089132653564188443272208127277664424448947476335413293018778018615899291704693105620242763173357203898195318179150836424196645745308205164116144020613415407736216097185962171301808761138424668335445923774195463").unwrap();
