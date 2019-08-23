@@ -27,7 +27,6 @@ use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
-use zkproofs::correct_key::CorrectKeyTrait;
 use zkproofs::CorrectKeyProofError;
 
 const STATISTICAL_ERROR_FACTOR: usize = 40;
@@ -422,6 +421,7 @@ mod tests {
     const RANGE_BITS: usize = 256; //for elliptic curves with 256bits for example
 
     use test::Bencher;
+    use zkproofs::correct_key::CorrectKeyTrait;
 
     use super::*;
     use paillier::{Keypair, Randomness};
