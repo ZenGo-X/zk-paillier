@@ -420,7 +420,6 @@ fn compute_digest(bytes: &[u8]) -> BigInt {
 mod tests {
     const RANGE_BITS: usize = 256; //for elliptic curves with 256bits for example
 
-    use test::Bencher;
     use zkproofs::correct_key::CorrectKeyTrait;
 
     use super::*;
@@ -574,53 +573,4 @@ mod tests {
         );
         assert!(result.is_err());
     }
-
-    #[bench]
-    fn bench_range_proof(b: &mut Bencher) {
-        // TODO: bench range for 256bit range.
-        b.iter(|| {
-            // common:
-            let range = BigInt::sample(RANGE_BITS);
-            // prover:
-            let (ek, _dk) = test_keypair().keys();
-            let (verifier_ek, _verifier_dk) = test_keypair().keys();
-            // verifier:
-            let (_com, _r, e) = RangeProof::verifier_commit(&verifier_ek);
-            // prover:
-            let (encrypted_pairs, data_and_randmoness_pairs) =
-                RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
-            // prover:
-            let secret_r = BigInt::sample_below(&ek.n);
-            let secret_x = BigInt::sample_below(&range.div_floor(&BigInt::from(3)));
-            //let secret_x = BigInt::from(0xFFFFFFFi64);
-            // common:
-            let cipher_x = Paillier::encrypt_with_chosen_randomness(
-                &ek,
-                RawPlaintext::from(&secret_x),
-                &Randomness(secret_r.clone()),
-            );
-            // verifer decommits (tested in test_commit_decommit)
-            // prover:
-            let z_vector = RangeProof::generate_proof(
-                &ek,
-                &secret_x,
-                &secret_r,
-                &e,
-                &range,
-                &data_and_randmoness_pairs,
-                STATISTICAL_ERROR_FACTOR,
-            );
-            // verifier:
-            let _result = RangeProof::verifier_output(
-                &ek,
-                &e,
-                &encrypted_pairs,
-                &z_vector,
-                &range,
-                &cipher_x.0,
-                STATISTICAL_ERROR_FACTOR,
-            );
-        });
-    }
-
 }
