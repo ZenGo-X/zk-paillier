@@ -28,6 +28,7 @@ pub use self::correct_key_ni::CorrectKeyProofError;
 pub use self::correct_key_ni::NICorrectKeyProof;
 mod range_proof;
 pub use self::range_proof::RangeProof;
+pub use self::range_proof::RangeProofTrait;
 
 pub use self::range_proof::ChallengeBits;
 pub use self::range_proof::EncryptedPairs;
@@ -41,18 +42,26 @@ pub use self::correct_message::CorrectMessageProof;
 pub use self::correct_message::CorrectMessageProofError;
 
 use curv::BigInt;
-use ring::digest::{Context, SHA256};
 use std::borrow::Borrow;
 
-fn compute_digest<IT>(values: IT) -> Vec<u8>
+use crypto::digest::Digest;
+use crypto::sha2::Sha256;
+use hex::decode;
+
+pub fn compute_digest<IT>(it: IT) -> BigInt
 where
     IT: Iterator,
     IT::Item: Borrow<BigInt>,
 {
-    let mut digest = Context::new(&SHA256);
-    for value in values {
+    let mut hasher = Sha256::new();
+    for value in it {
         let bytes: Vec<u8> = value.borrow().into();
-        digest.update(&bytes);
+        hasher.input(&bytes);
     }
-    digest.finish().as_ref().into()
+
+    let result_string = hasher.result_str();
+
+    let result_bytes = decode(result_string).unwrap();
+
+    BigInt::from(&result_bytes[..])
 }

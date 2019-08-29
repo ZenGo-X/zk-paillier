@@ -84,10 +84,9 @@ impl CorrectMessageProof {
             })
             .collect::<Vec<BigInt>>();
 
-        let digest = super::compute_digest(ai_vec.iter());
+        let chal = super::compute_digest(ai_vec.iter());
         let two_bn = BigInt::from(2);
         let two_to_security_param: BigInt = two_bn.pow(B as u32);
-        let chal = BigInt::from(&digest[..]);
         let chal = chal.modulus(&two_to_security_param);
 
         let ei_sum = ei_vec.iter().fold(BigInt::zero(), |acc, x| acc + x);
@@ -135,8 +134,7 @@ impl CorrectMessageProof {
         let num_of_message = self.valid_messages.len();
         let two_bn = BigInt::from(2);
         let two_to_security_param: BigInt = two_bn.pow(B as u32);
-        let digest = super::compute_digest(self.a_vec.iter());
-        let chal = BigInt::from(&digest[..]);
+        let chal = super::compute_digest(self.a_vec.iter());
         let chal = chal.modulus(&two_to_security_param);
         let ei_sum = self.e_vec.iter().fold(BigInt::zero(), |acc, x| acc + x);
         let ei_sum = ei_sum.modulus(&two_to_security_param);

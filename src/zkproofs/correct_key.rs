@@ -22,7 +22,6 @@ use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
-use ring::digest::{Context, SHA256};
 const STATISTICAL_ERROR_FACTOR: usize = 40;
 
 // TODO: generalize the error string and move the struct to a common location where all other proofs can use it as well
@@ -114,7 +113,7 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
             .map(|ri| BigInt::mod_pow(ri, &ek.n, &ek.n))
             .collect();
 
-        let e = compute_digest(iter::once(&ek.n).chain(&sn).chain(&rn));
+        let e = compute_digest(iter::once(&ek.n).chain(&sn).chain(&rn).into_iter());
 
         let z: Vec<_> = r
             .par_iter()
@@ -196,18 +195,26 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
     }
 }
 
-// TODO[Morten] generalise and move to super
-pub fn compute_digest<IT>(values: IT) -> BigInt
+use crypto::digest::Digest;
+use crypto::sha2::Sha256;
+use hex::decode;
+
+pub fn compute_digest<IT>(it: IT) -> BigInt
 where
     IT: Iterator,
     IT::Item: Borrow<BigInt>,
 {
-    let mut digest = Context::new(&SHA256);
-    for value in values {
+    let mut hasher = Sha256::new();
+    for value in it {
         let bytes: Vec<u8> = value.borrow().into();
-        digest.update(&bytes);
+        hasher.input(&bytes);
     }
-    BigInt::from(digest.finish().as_ref())
+
+    let result_string = hasher.result_str();
+
+    let result_bytes = decode(result_string).unwrap();
+
+    BigInt::from(&result_bytes[..])
 }
 
 #[cfg(test)]

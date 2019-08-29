@@ -1,6 +1,7 @@
 [package]
 name = "zk-paillier"
 version = "0.1.0"
+
 authors = [
     "Gary <gary@kzencorp.com>",
     "Morten Dahl <mortendahlcs@gmail.com>",
@@ -18,17 +19,19 @@ crate-type = ["lib"]
 
 [dependencies]
 paillier = { git = "https://github.com/KZen-networks/rust-paillier", branch = "feature/libra-support" }
-ring = "0.14"
 rand = "0.5"
 rayon = "1.0"
 bit-vec = "0.5"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
+rust-crypto = "^0.2"
+hex = "^0.3"
 
 [dependencies.curv]
 git = "https://github.com/KZen-networks/curv"
 branch = "feature/libra-support"
+features = ["ec_secp256k1"]
 
 
 
@@ -39,3 +42,6 @@ rust-gmp = { version = "0.5.0", features = ["serde_support"], git = "https://git
 criterion = "0.2"
 
 
+[[bench]]
+name = "all"
+harness = false
