@@ -21,7 +21,7 @@ paillier = { git = "https://github.com/KZen-networks/rust-paillier"}
 rand = "0.6"
 serde = { version = "1.0", features = ["derive"] }
 rayon = "1.1"
-bit-vec = "0.5"
+bit-vec = "0.6"
 rust-crypto = "^0.2"
 hex = "^0.3"
 
