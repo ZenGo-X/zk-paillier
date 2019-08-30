@@ -13,16 +13,6 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
-extern crate bit_vec;
-extern crate crypto;
-extern crate curv;
-extern crate hex;
-extern crate paillier;
-extern crate rand;
-extern crate rayon;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
+
 mod serialize;
 pub mod zkproofs;
