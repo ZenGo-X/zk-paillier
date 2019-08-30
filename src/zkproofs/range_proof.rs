@@ -13,30 +13,30 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
-use curv::arithmetic::traits::Samplable;
-use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
-use curv::cryptographic_primitives::hashing::traits::Hash;
 use std::borrow::Borrow;
 use std::mem;
 
+use super::CorrectKeyProofError;
 use bit_vec::BitVec;
-use rand::prelude::*;
-use rayon::prelude::*;
-
+use curv::arithmetic::traits::Samplable;
+use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
+use curv::cryptographic_primitives::hashing::traits::Hash;
 use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
-use zkproofs::CorrectKeyProofError;
+use rand::prelude::*;
+use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 
 const STATISTICAL_ERROR_FACTOR: usize = 40;
 
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct EncryptedPairs {
-    #[serde(with = "::serialize::vecbigint")]
+    #[serde(with = "crate::serialize::vecbigint")]
     pub c1: Vec<BigInt>, // TODO[Morten] should not need to be public
 
-    #[serde(with = "::serialize::vecbigint")]
+    #[serde(with = "crate::serialize::vecbigint")]
     pub c2: Vec<BigInt>, // TODO[Morten] should not need to be public
 }
 
@@ -55,26 +55,26 @@ pub struct ChallengeBits(Vec<u8>);
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Response {
     Open {
-        #[serde(with = "::serialize::bigint")]
+        #[serde(with = "crate::serialize::bigint")]
         w1: BigInt,
 
-        #[serde(with = "::serialize::bigint")]
+        #[serde(with = "crate::serialize::bigint")]
         r1: BigInt,
 
-        #[serde(with = "::serialize::bigint")]
+        #[serde(with = "crate::serialize::bigint")]
         w2: BigInt,
 
-        #[serde(with = "::serialize::bigint")]
+        #[serde(with = "crate::serialize::bigint")]
         r2: BigInt,
     },
 
     Mask {
         j: u8,
 
-        #[serde(with = "::serialize::bigint")]
+        #[serde(with = "crate::serialize::bigint")]
         masked_x: BigInt,
 
-        #[serde(with = "::serialize::bigint")]
+        #[serde(with = "crate::serialize::bigint")]
         masked_r: BigInt,
     },
 }
@@ -273,21 +273,19 @@ impl RangeProofTrait for RangeProof {
                         w2: data.w2[i].clone(),
                         r2: data.r2[i].clone(),
                     }
+                } else if secret_x + &data.w1[i] > range_scaled_third
+                    && secret_x + &data.w1[i] < range_scaled_two_thirds
+                {
+                    Response::Mask {
+                        j: 1,
+                        masked_x: secret_x + &data.w1[i],
+                        masked_r: secret_r * &data.r1[i] % &ek.n,
+                    }
                 } else {
-                    if secret_x + &data.w1[i] > range_scaled_third
-                        && secret_x + &data.w1[i] < range_scaled_two_thirds
-                    {
-                        Response::Mask {
-                            j: 1,
-                            masked_x: secret_x + &data.w1[i],
-                            masked_r: secret_r * &data.r1[i] % &ek.n,
-                        }
-                    } else {
-                        Response::Mask {
-                            j: 2,
-                            masked_x: secret_x + &data.w2[i],
-                            masked_r: secret_r * &data.r2[i] % &ek.n,
-                        }
+                    Response::Mask {
+                        j: 2,
+                        masked_x: secret_x + &data.w2[i],
+                        masked_r: secret_r * &data.r2[i] % &ek.n,
                     }
                 }
             })
@@ -335,24 +333,20 @@ impl RangeProofTrait for RangeProof {
                         )
                         .into();
 
-                        if &expected_c1i != &encrypted_pairs.c1[i] {
+                        if expected_c1i != encrypted_pairs.c1[i] {
                             res = false;
                         }
-                        if &expected_c2i != &encrypted_pairs.c2[i] {
+                        if expected_c2i != encrypted_pairs.c2[i] {
                             res = false;
                         }
 
-                        let mut flag = false;
-                        if w1 < &range_scaled_third {
-                            if w2 > &range_scaled_third && w2 < &range_scaled_two_thirds {
-                                flag = true;
-                            }
-                        }
-                        if w2 < &range_scaled_third {
-                            if w1 > &range_scaled_third && w1 < &range_scaled_two_thirds {
-                                flag = true;
-                            }
-                        }
+                        let flag = (*w2 < range_scaled_third
+                            && *w1 > range_scaled_third
+                            && *w1 < range_scaled_two_thirds)
+                            || (*w1 < range_scaled_third
+                                && *w2 > range_scaled_third
+                                && *w2 < range_scaled_two_thirds);
+
                         if !flag {
                             res = false;
                         }
@@ -384,7 +378,7 @@ impl RangeProofTrait for RangeProof {
                         if &c != enc_zi.0.borrow() {
                             res = false;
                         }
-                        if masked_x < &range_scaled_third || masked_x > &range_scaled_two_thirds {
+                        if *masked_x < range_scaled_third || *masked_x > range_scaled_two_thirds {
                             res = false;
                         }
 
@@ -413,18 +407,17 @@ fn get_paillier_commitment(ek: &EncryptionKey, x: &BigInt, r: &BigInt) -> BigInt
 
 fn compute_digest(bytes: &[u8]) -> BigInt {
     let input = BigInt::from(bytes);
-    HSha256::create_hash(&vec![&input])
+    HSha256::create_hash(&[&input])
 }
 
 #[cfg(test)]
 mod tests {
-    const RANGE_BITS: usize = 256; //for elliptic curves with 256bits for example
-
-    use zkproofs::correct_key::CorrectKeyTrait;
-
     use super::*;
+    use crate::zkproofs::correct_key::CorrectKey;
+    use crate::zkproofs::correct_key::CorrectKeyTrait;
     use paillier::{Keypair, Randomness};
-    use zkproofs::correct_key::CorrectKey;
+
+    const RANGE_BITS: usize = 256; //for elliptic curves with 256bits for example
 
     fn test_keypair() -> Keypair {
         let p = str::parse("148677972634832330983979593310074301486537017973460461278300587514468301043894574906886127642530475786889672304776052879927627556769456140664043088700743909632312483413393134504352834240399191134336344285483935856491230340093391784574980688823380828143810804684752914935441384845195613674104960646037368551517").unwrap();
@@ -435,7 +428,7 @@ mod tests {
     #[test]
     fn test_generate_encrypted_pairs() {
         let (ek, _dk) = test_keypair().keys();
-        let range = BigInt::from(0xFFFFFFFFFFFFFi64);
+        let range = BigInt::from(0x000F_FFFF_FFFF_FFFFi64);
         RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
         //Paillier::verifier_commit();
     }
@@ -460,12 +453,12 @@ mod tests {
     fn test_generate_proof() {
         let (ek, _dk) = test_keypair().keys();
         let (verifier_ek, _verifier_dk) = test_keypair().keys();
-        let range = BigInt::from(0xFFFFFFFFFFFFFi64);
+        let range = BigInt::from(0x000F_FFFF_FFFF_FFFFi64);
         let (_com, _r, e) = RangeProof::verifier_commit(&verifier_ek);
         let (_encrypted_pairs, data_and_randmoness_pairs) =
             RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
         let secret_r = BigInt::sample_below(&ek.n);
-        let secret_x = BigInt::from(0xFFFFFFFi64);
+        let secret_x = BigInt::from(0x0FFF_FFFFi64);
         let _z_vector = RangeProof::generate_proof(
             &ek,
             &secret_x,

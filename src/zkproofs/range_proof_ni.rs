@@ -13,14 +13,18 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
+use std::error::Error;
+use std::fmt;
+
 use curv::arithmetic::traits::Converter;
 use curv::BigInt;
 use paillier::EncryptionKey;
-use std::error::Error;
-use std::fmt;
-use zkproofs::range_proof::RangeProof;
-use zkproofs::range_proof::RangeProofTrait;
-use zkproofs::range_proof::{ChallengeBits, EncryptedPairs, Proof};
+use serde::{Deserialize, Serialize};
+
+use super::range_proof::RangeProof;
+use super::range_proof::RangeProofTrait;
+use super::range_proof::{ChallengeBits, EncryptedPairs, Proof};
+
 const SECURITY_PARAMETER: usize = 128;
 /// Zero-knowledge range proof that a value x<q/3 lies in interval [0,q].
 ///
@@ -118,9 +122,10 @@ impl RangeProofNi {
             &self.ciphertext,
             self.error_factor,
         );
-        match result.is_ok() {
-            true => Ok(()),
-            false => Err(RangeProofError),
+        if result.is_ok() {
+            Ok(())
+        } else {
+            Err(RangeProofError)
         }
     }
 
@@ -137,11 +142,12 @@ impl RangeProofNi {
             &self.proof,
             &self.range,
             &self.ciphertext,
-            self.error_factor.clone(),
+            self.error_factor,
         );
-        match result.is_ok() {
-            true => Ok(()),
-            false => Err(RangeProofError),
+        if result.is_ok() {
+            Ok(())
+        } else {
+            Err(RangeProofError)
         }
     }
 }

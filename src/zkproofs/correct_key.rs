@@ -22,6 +22,8 @@ use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
+
 const STATISTICAL_ERROR_FACTOR: usize = 40;
 
 // TODO: generalize the error string and move the struct to a common location where all other proofs can use it as well
@@ -43,25 +45,25 @@ impl Error for CorrectKeyProofError {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Challenge {
-    #[serde(with = "::serialize::vecbigint")]
+    #[serde(with = "crate::serialize::vecbigint")]
     pub sn: Vec<BigInt>,
 
-    #[serde(with = "::serialize::bigint")]
+    #[serde(with = "crate::serialize::bigint")]
     pub e: BigInt,
 
-    #[serde(with = "::serialize::vecbigint")]
+    #[serde(with = "crate::serialize::vecbigint")]
     pub z: Vec<BigInt>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VerificationAid {
-    #[serde(with = "::serialize::bigint")]
+    #[serde(with = "crate::serialize::bigint")]
     s_digest: BigInt,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CorrectKeyProof {
-    #[serde(with = "::serialize::bigint")]
+    #[serde(with = "crate::serialize::bigint")]
     s_digest: BigInt,
 }
 
@@ -113,7 +115,7 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
             .map(|ri| BigInt::mod_pow(ri, &ek.n, &ek.n))
             .collect();
 
-        let e = compute_digest(iter::once(&ek.n).chain(&sn).chain(&rn).into_iter());
+        let e = compute_digest(iter::once(&ek.n).chain(&sn).chain(&rn));
 
         let z: Vec<_> = r
             .par_iter()
@@ -177,10 +179,7 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
         }
 
         // compute proof in the form of a hash of the recovered roots
-        let s_digest = compute_digest(challenge.sn.iter().map(|sni| {
-            let si = extract_nroot(dk, sni);
-            si
-        }));
+        let s_digest = compute_digest(challenge.sn.iter().map(|sni| extract_nroot(dk, sni)));
 
         Ok(CorrectKeyProof { s_digest })
     }
@@ -264,5 +263,4 @@ mod tests {
         let result = CorrectKey::verify(&proof_results.unwrap(), &verification_aid);
         assert!(result.is_err()); // ERROR expected because of manipulated aid
     }
-
 }

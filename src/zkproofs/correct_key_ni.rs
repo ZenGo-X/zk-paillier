@@ -20,6 +20,7 @@ use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 // This protocol is based on the NIZK protocol in https://eprint.iacr.org/2018/057.pdf
 // for parameters = e = N, m2 = 11, alpha = 6379 see https://eprint.iacr.org/2018/987.pdf 6.2.3
 // for full details.
@@ -34,14 +35,14 @@ const DIGEST_SIZE: usize = 256;
 pub struct CorrectKeyProofError;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct NICorrectKeyProof {
-    #[serde(with = "::serialize::vecbigint")]
+    #[serde(with = "crate::serialize::vecbigint")]
     pub sigma_vec: Vec<BigInt>,
 }
 
 impl NICorrectKeyProof {
     pub fn proof(dk: &DecryptionKey) -> NICorrectKeyProof {
         let dk_n = &dk.q * &dk.p;
-        let key_length = &dk_n.bit_length();
+        let key_length = dk_n.bit_length();
 
         let salt_bn = BigInt::from(SALT_STRING);
 
@@ -51,19 +52,16 @@ impl NICorrectKeyProof {
                 let seed_bn = super::compute_digest(
                     iter::once(&dk_n)
                         .chain(iter::once(&salt_bn))
-                        .chain(iter::once(&BigInt::from(i.clone() as u32))),
+                        .chain(iter::once(&BigInt::from(i as u32))),
                 );
                 //   let seed_bn = BigInt::from(&seed[..]);
-                mask_generation(&key_length, &seed_bn) % &dk_n
+                mask_generation(key_length, &seed_bn) % &dk_n
             })
             .collect::<Vec<BigInt>>();
 
         let sigma_vec = rho_vec
             .iter()
-            .map(|i| {
-                let sigma_i = extract_nroot(dk, i);
-                sigma_i
-            })
+            .map(|i| extract_nroot(dk, i))
             .collect::<Vec<BigInt>>();
         NICorrectKeyProof { sigma_vec }
     }
@@ -77,9 +75,9 @@ impl NICorrectKeyProof {
                 let seed_bn = super::compute_digest(
                     iter::once(&ek.n)
                         .chain(iter::once(&salt_bn))
-                        .chain(iter::once(&BigInt::from(i.clone() as u32))),
+                        .chain(iter::once(&BigInt::from(i as u32))),
                 );
-                mask_generation(&key_length, &seed_bn) % &ek.n
+                mask_generation(key_length, &seed_bn) % &ek.n
             })
             .collect::<Vec<BigInt>>();
         let alpha_primorial: BigInt = str::parse(&P).unwrap();
@@ -100,13 +98,11 @@ impl NICorrectKeyProof {
 
 // generate random element of size :
 // based on https://tools.ietf.org/html/rfc8017#appendix-B.2.1
-pub fn mask_generation(out_length: &usize, seed: &BigInt) -> BigInt {
+pub fn mask_generation(out_length: usize, seed: &BigInt) -> BigInt {
     let msklen = out_length / DIGEST_SIZE + 1; // adding one sha256 is more efficient then rejection sampling (see A.4 (e) in the paper)
     let msklen_hash_vec = (0..msklen)
         .map(|j| {
-            super::compute_digest(
-                iter::once(seed).chain(iter::once(&BigInt::from(j.clone() as u32))),
-            )
+            super::compute_digest(iter::once(seed).chain(iter::once(&BigInt::from(j as u32))))
             // concat elements of  msklen_hash_vec to one long element
         })
         .collect::<Vec<BigInt>>();

@@ -36,10 +36,7 @@ pub mod vecbigint {
     use serde::{de, ser};
     use std::fmt;
 
-    pub fn serialize<S: ser::Serializer>(
-        x: &Vec<BigInt>,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error> {
+    pub fn serialize<S: ser::Serializer>(x: &[BigInt], serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(x.len()))?;
         for e in x {
             seq.serialize_element(&e.to_str_radix(10))?;

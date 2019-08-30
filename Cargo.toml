@@ -1,6 +1,7 @@
 [package]
 name = "zk-paillier"
 version = "0.1.0"
+edition = "2018"
 
 authors = [
     "Gary <gary@kzencorp.com>",
@@ -8,7 +9,6 @@ authors = [
     "Omer <omer.shlomovits@gmail.com>"
 ]
 keywords = ["paillier", "zero knowledge"]
-
 
 license = "GPL-3.0-or-later"
 categories = ["cryptography"]
@@ -18,12 +18,10 @@ crate-type = ["lib"]
 
 [dependencies]
 paillier = { git = "https://github.com/KZen-networks/rust-paillier"}
-rand = "0.5"
-rayon = "1.0"
+rand = "0.6"
+serde = { version = "1.0", features = ["derive"] }
+rayon = "1.1"
 bit-vec = "0.5"
-serde = "1.0"
-serde_derive = "1.0"
-serde_json = "1.0"
 rust-crypto = "^0.2"
 hex = "^0.3"
 
@@ -31,14 +29,8 @@ hex = "^0.3"
 git = "https://github.com/KZen-networks/curv"
 features = ["ec_secp256k1"]
 
-
-
-[patch.crates-io]
-rust-gmp = { version = "0.5.0", features = ["serde_support"], git = "https://github.com/KZen-networks/rust-gmp" }
-
 [dev-dependencies]
-criterion = "0.2"
-
+criterion = "0.3"
 
 [[bench]]
 name = "all"
