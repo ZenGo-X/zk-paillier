@@ -4,8 +4,7 @@ version = "0.1.0"
 authors = [
     "Gary <gary@kzencorp.com>",
     "Morten Dahl <mortendahlcs@gmail.com>",
-    "Omer <omer.shlomovits@gmail.com>",
-    "Oded Leiba <odedleiba5@gmail.com>"
+    "Omer <omer.shlomovits@gmail.com>"
 ]
 keywords = ["paillier", "zero knowledge"]
 
@@ -17,7 +16,7 @@ categories = ["cryptography"]
 crate-type = ["lib"]
 
 [dependencies]
-paillier = { git = "https://github.com/KZen-networks/rust-paillier", branch = "feature/libra-support" }
+paillier = { git = "https://github.com/KZen-networks/rust-paillier", branch = "feature/libra-support-fix" }
 ring = "0.14"
 rand = "0.5"
 rayon = "1.0"
@@ -28,9 +27,7 @@ serde_json = "1.0"
 
 [dependencies.curv]
 git = "https://github.com/KZen-networks/curv"
-branch = "feature/libra-support"
-
-
+branch = "feature/libra-support-fix"
 
 [patch.crates-io]
 rust-gmp = { version = "0.5.0", features = ["serde_support"], git = "https://github.com/KZen-networks/rust-gmp" }
