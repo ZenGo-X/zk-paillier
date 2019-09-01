@@ -6,8 +6,7 @@ edition = "2018"
 authors = [
     "Gary <gary@kzencorp.com>",
     "Morten Dahl <mortendahlcs@gmail.com>",
-    "Omer <omer.shlomovits@gmail.com>",
-    "Oded Leiba <odedleiba5@gmail.com>"
+    "Omer <omer.shlomovits@gmail.com>"
 ]
 keywords = ["paillier", "zero knowledge"]
 
