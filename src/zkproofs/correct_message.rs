@@ -78,7 +78,7 @@ impl CorrectMessageProof {
                     let zi_n = BigInt::mod_pow(&zi_vec[j], &ek.n, &ek.nn);
                     let ui_ei = BigInt::mod_pow(&ui_vec[i], &ei_vec[j], &ek.nn);
                     let ui_ei_inv = ui_ei.invert(&ek.nn).unwrap();
-                    j = j + 1;
+                    j += 1;
                     BigInt::mod_mul(&zi_n, &ui_ei_inv, &ek.nn)
                 }
             })
@@ -103,7 +103,7 @@ impl CorrectMessageProof {
                     ei.clone()
                 } else {
                     let k = j;
-                    j = j + 1;
+                    j += 1;
                     ei_vec[k].clone()
                 }
             })
@@ -116,7 +116,7 @@ impl CorrectMessageProof {
                     zi.clone()
                 } else {
                     let k = j;
-                    j = j + 1;
+                    j += 1;
                     zi_vec[k].clone()
                 }
             })
@@ -158,7 +158,7 @@ impl CorrectMessageProof {
                 ak_mul_uk_ek == zi_n
             })
             .collect::<Vec<bool>>();
-        if result_vec.iter().all(|&x| x == true) {
+        if result_vec.iter().all(|&x| x) {
             Ok(())
         } else {
             Err(CorrectMessageProofError)

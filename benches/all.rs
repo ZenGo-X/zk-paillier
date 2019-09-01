@@ -1,13 +1,8 @@
-#[macro_use]
-extern crate criterion;
-extern crate curv;
-extern crate paillier;
-extern crate zk_paillier;
-
-use criterion::{Criterion, ParameterizedBenchmark};
+use criterion::{criterion_group, criterion_main, Criterion, ParameterizedBenchmark};
 use curv::arithmetic::traits::Samplable;
 use curv::BigInt;
 use paillier::{EncryptWithChosenRandomness, Keypair, Paillier, Randomness, RawPlaintext};
+
 use zk_paillier::zkproofs::RangeProofTrait;
 use zk_paillier::zkproofs::{RangeProof, RangeProofNi};
 
@@ -85,13 +80,11 @@ const RANGE_BITS: usize = 256; //for elliptic curves with 256bits for example
 fn criterion_benchmark(c: &mut Criterion) {
     c.bench(
         "range proof",
-        ParameterizedBenchmark::new("few", |b, _| b.iter(|| range_proof()), vec![0])
-            .sample_size(20),
+        ParameterizedBenchmark::new("few", |b, _| b.iter(range_proof), vec![0]).sample_size(20),
     );
     c.bench(
         "range proof ni",
-        ParameterizedBenchmark::new("few", |b, _| b.iter(|| range_proof_ni()), vec![0])
-            .sample_size(10),
+        ParameterizedBenchmark::new("few", |b, _| b.iter(range_proof_ni), vec![0]).sample_size(10),
     );
 }
 
