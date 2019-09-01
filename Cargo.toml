@@ -1,6 +1,6 @@
 [package]
 name = "zk-paillier"
-version = "0.1.0"
+version = "0.2.0"
 
 authors = [
     "Gary <gary@kzencorp.com>",
@@ -18,7 +18,7 @@ categories = ["cryptography"]
 crate-type = ["lib"]
 
 [dependencies]
-paillier = { git = "https://github.com/KZen-networks/rust-paillier", branch = "feature/libra-support" }
+paillier = { git = "https://github.com/KZen-networks/rust-paillier", tag = "v0.3.0" }
 rand = "0.5"
 rayon = "1.0"
 bit-vec = "0.5"
@@ -30,7 +30,7 @@ hex = "^0.3"
 
 [dependencies.curv]
 git = "https://github.com/KZen-networks/curv"
-branch = "feature/libra-support"
+tag = "v0.2.0"
 features = ["ec_secp256k1"]
 
 
