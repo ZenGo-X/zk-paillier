@@ -44,9 +44,8 @@ pub use self::correct_message::CorrectMessageProofError;
 use curv::BigInt;
 use std::borrow::Borrow;
 
-use crypto::digest::Digest;
-use crypto::sha2::Sha256;
-use hex::decode;
+use digest::Digest;
+use sha2::Sha256;
 
 pub fn compute_digest<IT>(it: IT) -> BigInt
 where
@@ -59,9 +58,6 @@ where
         hasher.input(&bytes);
     }
 
-    let result_string = hasher.result_str();
-
-    let result_bytes = decode(result_string).unwrap();
-
-    BigInt::from(&result_bytes[..])
+    let result_hex = hasher.result();
+    BigInt::from(&result_hex[..])
 }
