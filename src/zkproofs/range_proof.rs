@@ -3,9 +3,6 @@
 
     Copyright 2018 by Kzen Networks
 
-    This file is part of Multisig Schnorr library
-    (https://github.com/KZen-networks/multisig-schnorr)
-
     zk-paillier is free software: you can redistribute
     it and/or modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation, either
