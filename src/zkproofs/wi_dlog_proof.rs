@@ -32,7 +32,6 @@ const SAMPLE_S : usize = 256;
 pub struct DLogProof{
     pub x: BigInt,
     pub y: BigInt,
-    pub statement: DLogStatement,
 }
 
 #[derive( Debug, Serialize, Deserialize, Clone)]
@@ -65,26 +64,25 @@ impl DLogProof{
         DLogProof{
             x,
             y,
-            statement: statement.clone(),
         }
     }
 
-    pub fn verify(&self) -> Result<(), ProofError>{
+    pub fn verify(&self, statement:&DLogStatement) -> Result<(), ProofError>{
         //assert N > 2^k
-        assert!(self.statement.ek.n > BigInt::from(2).pow(K as u32));
+        assert!(statement.ek.n > BigInt::from(2).pow(K as u32));
 
         //test that g, ni in multiplecative group Z_N*
-        assert_eq!(self.statement.g.gcd(&self.statement.ek.n), BigInt::one());
-        assert_eq!(self.statement.ni.gcd(&self.statement.ek.n), BigInt::one());
+        assert_eq!(statement.g.gcd(&statement.ek.n), BigInt::one());
+        assert_eq!(statement.ni.gcd(&statement.ek.n), BigInt::one());
 
         let e = super::compute_digest(
             iter::once(&self.x)
-                .chain(iter::once(&self.statement.g))
-                .chain(iter::once(&self.statement.ek.n)),
+                .chain(iter::once(&statement.g))
+                .chain(iter::once(&statement.ek.n)),
         );
-        let ni_e = BigInt::mod_pow(&self.statement.ni, &e, &self.statement.ek.n);
-        let g_y = BigInt::mod_pow(&self.statement.g, &self.y, &self.statement.ek.n);
-        let g_y_ni_e = BigInt::mod_mul(&g_y, &ni_e, &self.statement.ek.n);
+        let ni_e = BigInt::mod_pow(&statement.ni, &e, &statement.ek.n);
+        let g_y = BigInt::mod_pow(&statement.g, &self.y, &statement.ek.n);
+        let g_y_ni_e = BigInt::mod_mul(&g_y, &ni_e, &statement.ek.n);
 
         // x=? g^yv^e modN
         if self.x == g_y_ni_e{
@@ -119,7 +117,7 @@ mod tests {
             ni: h2,
         };
         let proof = DLogProof::prove(&statement, &secret);
-        let v = proof.verify();
+        let v = proof.verify(&statement);
         assert!(v.is_ok());
     }
 
@@ -141,7 +139,7 @@ mod tests {
             ni: h2,
         };
         let proof = DLogProof::prove(&statement, &secret);
-        let v = proof.verify();
+        let v = proof.verify(&statement);
         assert!(v.is_ok());
     }
 
@@ -163,7 +161,7 @@ mod tests {
             ni: h2,
         };
         let proof = DLogProof::prove(&statement, &secret);
-        let v = proof.verify();
+        let v = proof.verify(&statement);
         assert!(v.is_ok());
     }
 }
