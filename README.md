@@ -7,12 +7,13 @@ For each proof we state in comments what are the security assumption required. P
 Currently implemented proofs
 -------------------
 
-* proof of correct paillier keypair generation
-* non-interactive proof of correct paillier keypair generation
-* range proof that a paillier ciphertext lies in interval [0,q]
-* non-interactive range proof that a paillier ciphertext lies in interval [0,q]
-* proof of correct opening of a ciphertext
-* proof that a ciphertext encrypts a message from a given message space
+* Proof of correct paillier keypair generation
+* Non-interactive proof of correct paillier keypair generation
+* Range proof that a paillier ciphertext lies in interval [0,q]
+* Non-interactive range proof that a paillier ciphertext lies in interval [0,q]
+* Proof of correct opening of a ciphertext
+* Proof that a ciphertext encrypts a message from a given message space
+* Witness Indistinguishable Proof of knowledge of discrete log with composite modulus
 
 Usage
 -------------------
