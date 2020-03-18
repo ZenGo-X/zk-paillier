@@ -12,6 +12,7 @@
 */
 
 mod wi_dlog_proof;
+pub use self::wi_dlog_proof::*;
 
 mod correct_opening;
 pub use self::correct_opening::CorrectOpening;
