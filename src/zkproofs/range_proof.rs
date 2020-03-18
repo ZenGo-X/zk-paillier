@@ -28,7 +28,7 @@ use serde::{Deserialize, Serialize};
 
 const STATISTICAL_ERROR_FACTOR: usize = 40;
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct EncryptedPairs {
     #[serde(with = "crate::serialize::vecbigint")]
     pub c1: Vec<BigInt>, // TODO[Morten] should not need to be public
@@ -49,7 +49,7 @@ pub struct DataRandomnessPairs {
 pub struct ChallengeBits(Vec<u8>);
 
 // TODO[Morten] find better name
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Response {
     Open {
         #[serde(with = "crate::serialize::bigint")]
@@ -76,7 +76,7 @@ pub enum Response {
     },
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Proof(Vec<Response>);
 
 pub struct Commitment(BigInt);
