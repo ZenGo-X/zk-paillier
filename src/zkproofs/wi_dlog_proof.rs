@@ -90,6 +90,17 @@ impl CompositeDLogProof {
     }
 }
 
+pub fn legendre_symbol(a: &BigInt, p: &BigInt) -> i32 {
+    let p_minus_1: BigInt = p - BigInt::one();
+    let pow = BigInt::mod_mul(&p_minus_1, &BigInt::from(2).invert(p).unwrap(), p);
+    let ls = BigInt::mod_pow(a, &pow, p);
+    if ls == BigInt::one() {
+        1
+    } else {
+        -1
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -99,11 +110,18 @@ mod tests {
 
     #[test]
     fn test_correct_dlog_proof() {
+        // should be safe primes (not sure if there is actual attack)
         let (ek, dk) = Paillier::keypair().keys();
         let one = BigInt::one();
-        let phi = (&dk.p - &one) * (&dk.q - &one);
         let S = BigInt::from(2).pow(SAMPLE_S as u32);
-        let h1 = BigInt::sample_below(&phi);
+        // Per definition 3 in the paper we need to make sure h1 is asymmetric basis:
+        // Jacobi symbol should be -1.
+        let mut h1 = BigInt::sample_range(&one, &(&ek.n - &one));
+        let mut jacobi_symbol = legendre_symbol(&h1, &dk.p) * legendre_symbol(&h1, &dk.q);
+        while jacobi_symbol != -1 {
+            h1 = BigInt::sample_range(&one, &(&ek.n - &one));
+            jacobi_symbol = legendre_symbol(&h1, &dk.p) * legendre_symbol(&h1, &dk.q);
+        }
         let secret = BigInt::sample_below(&S);
         let h2 = BigInt::mod_pow(&h1, &(-&secret), &ek.n);
         let statement = DLogStatement {
@@ -121,9 +139,15 @@ mod tests {
     fn test_bad_dlog_proof() {
         let (ek, dk) = Paillier::keypair().keys();
         let one = BigInt::one();
-        let phi = (&dk.p - &one) * (&dk.q - &one);
         let S = BigInt::from(2).pow(SAMPLE_S as u32);
-        let h1 = BigInt::sample_below(&phi);
+        // Per definition 3 in the paper we need to make sure h1 is asymmetric basis:
+        // Jacobi symbol should be -1.
+        let mut h1 = BigInt::sample_range(&one, &(&ek.n - &one));
+        let mut jacobi_symbol = legendre_symbol(&h1, &dk.p) * legendre_symbol(&h1, &dk.q);
+        while jacobi_symbol != -1 {
+            h1 = BigInt::sample_range(&one, &(&ek.n - &one));
+            jacobi_symbol = legendre_symbol(&h1, &dk.p) * legendre_symbol(&h1, &dk.q);
+        }
         let secret = BigInt::sample_below(&S);
         // here we use "+secret", instead of "-secret".
         let h2 = BigInt::mod_pow(&h1, &(secret), &ek.n);
@@ -142,12 +166,18 @@ mod tests {
     fn test_bad_dlog_proof_2() {
         let (ek, dk) = Paillier::keypair().keys();
         let one = BigInt::one();
-        let phi = (&dk.p - &one) * (&dk.q - &one);
         let S = BigInt::from(2).pow(SAMPLE_S as u32);
-        let h1 = BigInt::sample_below(&phi);
+        // Per definition 3 in the paper we need to make sure h1 is asymmetric basis:
+        // Jacobi symbol should be -1.
+        let mut h1 = BigInt::sample_range(&one, &(&ek.n - &one));
+        let mut jacobi_symbol = legendre_symbol(&h1, &dk.p) * legendre_symbol(&h1, &dk.q);
+        while jacobi_symbol != -1 {
+            h1 = BigInt::sample_range(&one, &(&ek.n - &one));
+            jacobi_symbol = legendre_symbol(&h1, &dk.p) * legendre_symbol(&h1, &dk.q);
+        }
         let secret = BigInt::sample_below(&S);
         // here we let h2 to be sampled in random
-        let h2 = BigInt::sample_below(&phi);
+        let h2 = BigInt::sample_range(&one, &(&ek.n - &one));
 
         let statement = DLogStatement {
             N: ek.n,
