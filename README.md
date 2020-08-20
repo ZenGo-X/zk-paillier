@@ -34,6 +34,6 @@ License
 -------
 zk-paillier is released under the terms of the GPL-3.0 license. See [LICENSE](LICENSE) for more information.
 
-Contact
--------------------
-For any questions, feel free to [email us](mailto:github@kzencorp.com).
+## Contact
+
+Feel free to [reach out](mailto:github@kzencorp.com) or join ZenGo X [Telegram](https://t.me/zengo_x) for discussions on code and research.
