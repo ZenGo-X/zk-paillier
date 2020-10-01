@@ -11,6 +11,12 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
 
+mod multiplication_proof;
+pub use self::multiplication_proof::*;
+
+mod verlin_proof;
+pub use self::verlin_proof::*;
+
 mod wi_dlog_proof;
 pub use self::wi_dlog_proof::*;
 

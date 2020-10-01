@@ -2,7 +2,7 @@ Zero Knowledge Paillier
 -------------------
 This library contains a collection of Paillier cryptosystem zero knowledge proofs written in Rust. 
 Each proof can be used as a stand alone proof but usually it will be used as part of another protocol. 
-For each proof we state in comments what are the security assumption required. Pay special attention to proofs that require more assumptions than just DCRA which is the assumption used in Paillier cryptosystem.
+For each proof we state in comments what are the security assumptions required. Pay special attention to proofs that require more assumptions than just DCRA which is the assumption used in Paillier cryptosystem.
 
 Currently implemented proofs
 -------------------
