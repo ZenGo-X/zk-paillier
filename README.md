@@ -14,6 +14,8 @@ Currently implemented proofs
 * Proof of correct opening of a ciphertext
 * Proof that a ciphertext encrypts a message from a given message space
 * Witness Indistinguishable Proof of knowledge of discrete log with composite modulus
+* NI Proof of plaintext multiplication: ciphertexts `e_a = Enc(a), e_b = Enc(b), e_c = Enc(c)` such that `ab = c mod n`
+* NI proof of linear relation between several plaintexts of several known ciphertexts 
 
 Usage
 -------------------
