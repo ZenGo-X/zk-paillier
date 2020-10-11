@@ -156,8 +156,8 @@ fn gen_phi(
 #[cfg(test)]
 mod tests {
     use crate::zkproofs::verlin_proof::gen_phi;
-    use crate::zkproofs::verlin_proof::VerlinStatement;
     use crate::zkproofs::verlin_proof::VerlinProof;
+    use crate::zkproofs::verlin_proof::VerlinStatement;
     use crate::zkproofs::verlin_proof::VerlinWitness;
     use curv::arithmetic::traits::Samplable;
     use curv::BigInt;
