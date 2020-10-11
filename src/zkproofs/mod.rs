@@ -31,6 +31,7 @@ pub use self::correct_key::CorrectKeyProof;
 pub use self::correct_key::VerificationAid;
 mod correct_key;
 pub use self::correct_key::CorrectKey;
+pub use self::correct_key_ni::SALT_STRING;
 
 mod correct_key_ni;
 pub use self::correct_key_ni::CorrectKeyProofError;
