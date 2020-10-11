@@ -31,7 +31,7 @@ pub struct MulProof {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub struct Witness {
+pub struct MulWitness {
     pub a: BigInt,
     pub b: BigInt,
     pub c: BigInt,
@@ -41,7 +41,7 @@ pub struct Witness {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub struct Statement {
+pub struct MulStatement {
     pub ek: EncryptionKey,
     pub e_a: BigInt,
     pub e_b: BigInt,
@@ -49,7 +49,7 @@ pub struct Statement {
 }
 
 impl MulProof {
-    pub fn prove(witness: &Witness, statement: &Statement) -> Result<Self, ()> {
+    pub fn prove(witness: &MulWitness, statement: &MulStatement) -> Result<Self, ()> {
         let d = BigInt::sample_below(&statement.ek.n);
         let r_d = sample_paillier_random(&statement.ek.n);
         let e_d = Paillier::encrypt_with_chosen_randomness(
@@ -97,7 +97,7 @@ impl MulProof {
         })
     }
 
-    pub fn verify(&self, statement: &Statement) -> Result<(), ()> {
+    pub fn verify(&self, statement: &MulStatement) -> Result<(), ()> {
         let e = super::compute_digest(
             iter::once(&statement.ek.n)
                 .chain(iter::once(&statement.e_a))
@@ -149,8 +149,8 @@ fn sample_paillier_random(modulo: &BigInt) -> BigInt {
 mod tests {
     use crate::zkproofs::multiplication_proof::sample_paillier_random;
     use crate::zkproofs::multiplication_proof::MulProof;
-    use crate::zkproofs::multiplication_proof::Statement;
-    use crate::zkproofs::multiplication_proof::Witness;
+    use crate::zkproofs::multiplication_proof::MulStatement;
+    use crate::zkproofs::multiplication_proof::MulWitness;
     use curv::arithmetic::traits::{Modulo, Samplable};
     use curv::BigInt;
     use paillier::core::Randomness;
@@ -193,7 +193,7 @@ mod tests {
         .0
         .into_owned();
 
-        let witness = Witness {
+        let witness = MulWitness {
             a,
             b,
             c,
@@ -202,7 +202,7 @@ mod tests {
             r_c,
         };
 
-        let statement = Statement { ek, e_a, e_b, e_c };
+        let statement = MulStatement { ek, e_a, e_b, e_c };
 
         let proof = MulProof::prove(&witness, &statement).unwrap();
         let verify = proof.verify(&statement);
@@ -246,7 +246,7 @@ mod tests {
         .0
         .into_owned();
 
-        let witness = Witness {
+        let witness = MulWitness {
             a,
             b,
             c,
@@ -255,7 +255,7 @@ mod tests {
             r_c,
         };
 
-        let statement = Statement { ek, e_a, e_b, e_c };
+        let statement = MulStatement { ek, e_a, e_b, e_c };
 
         let proof = MulProof::prove(&witness, &statement).unwrap();
         let verify = proof.verify(&statement);

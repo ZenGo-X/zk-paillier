@@ -30,7 +30,7 @@ pub struct VerlinProof {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub struct Witness {
+pub struct VerlinWitness {
     pub x: BigInt,
     pub x_prime: BigInt,
     pub x_double_prime: BigInt,
@@ -38,7 +38,7 @@ pub struct Witness {
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub struct Statement {
+pub struct VerlinStatement {
     pub ek: EncryptionKey,
     pub c: BigInt,
     pub c_prime: BigInt,
@@ -46,7 +46,7 @@ pub struct Statement {
 }
 
 impl VerlinProof {
-    pub fn prove(witness: &Witness, statement: &Statement) -> Result<Self, ()> {
+    pub fn prove(witness: &VerlinWitness, statement: &VerlinStatement) -> Result<Self, ()> {
         let a = BigInt::sample_below(&statement.ek.n);
         let a_prime = BigInt::sample_below(&statement.ek.n);
         let a_double_prime = BigInt::sample_below(&statement.ek.n);
@@ -87,7 +87,7 @@ impl VerlinProof {
         })
     }
 
-    pub fn verify(&self, statement: &Statement) -> Result<(), ()> {
+    pub fn verify(&self, statement: &VerlinStatement) -> Result<(), ()> {
         let e = super::compute_digest(
             iter::once(&statement.ek.n)
                 .chain(iter::once(&statement.c))
@@ -156,9 +156,9 @@ fn gen_phi(
 #[cfg(test)]
 mod tests {
     use crate::zkproofs::verlin_proof::gen_phi;
-    use crate::zkproofs::verlin_proof::Statement;
+    use crate::zkproofs::verlin_proof::VerlinStatement;
     use crate::zkproofs::verlin_proof::VerlinProof;
-    use crate::zkproofs::verlin_proof::Witness;
+    use crate::zkproofs::verlin_proof::VerlinWitness;
     use curv::arithmetic::traits::Samplable;
     use curv::BigInt;
     use paillier::traits::Encrypt;
@@ -183,14 +183,14 @@ mod tests {
         let c_prime_bn = c_prime.0.clone().into_owned();
         let phi_x = gen_phi(&ek, &c_bn, &c_prime_bn, &x, &x_prime, &x_double_prime, &r_x);
 
-        let witness = Witness {
+        let witness = VerlinWitness {
             x,
             x_prime,
             x_double_prime,
             r_x,
         };
 
-        let statement = Statement {
+        let statement = VerlinStatement {
             ek,
             c: c_bn,
             c_prime: c_prime_bn,
@@ -229,14 +229,14 @@ mod tests {
             &r_x,
         );
 
-        let witness = Witness {
+        let witness = VerlinWitness {
             x,
             x_prime,
             x_double_prime,
             r_x,
         };
 
-        let statement = Statement {
+        let statement = VerlinStatement {
             ek,
             c: c_bn,
             c_prime: c_prime_bn,
@@ -275,14 +275,14 @@ mod tests {
             &(&r_x + BigInt::one()),
         );
 
-        let witness = Witness {
+        let witness = VerlinWitness {
             x,
             x_prime,
             x_double_prime,
             r_x,
         };
 
-        let statement = Statement {
+        let statement = VerlinStatement {
             ek,
             c: c_bn,
             c_prime: c_prime_bn,
