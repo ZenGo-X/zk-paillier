@@ -11,6 +11,9 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
 
+mod correct_ciphertext;
+pub use self::correct_ciphertext::*;
+
 mod multiplication_proof;
 pub use self::multiplication_proof::*;
 
