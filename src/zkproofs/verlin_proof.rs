@@ -31,10 +31,10 @@ pub struct VerlinProof {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Witness {
-    x: BigInt,
-    x_prime: BigInt,
-    x_double_prime: BigInt,
-    r_x: BigInt,
+    pub x: BigInt,
+    pub x_prime: BigInt,
+    pub x_double_prime: BigInt,
+    pub r_x: BigInt,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]

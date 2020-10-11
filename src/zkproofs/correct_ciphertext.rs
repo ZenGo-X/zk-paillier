@@ -22,8 +22,8 @@ pub struct CiphertextProof {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct CiphertextWitness {
-    x: BigInt,
-    r: BigInt,
+    pub x: BigInt,
+    pub r: BigInt,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]

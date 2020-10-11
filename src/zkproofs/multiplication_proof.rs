@@ -32,12 +32,12 @@ pub struct MulProof {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Witness {
-    a: BigInt,
-    b: BigInt,
-    c: BigInt,
-    r_a: BigInt,
-    r_b: BigInt,
-    r_c: BigInt,
+    pub a: BigInt,
+    pub b: BigInt,
+    pub c: BigInt,
+    pub r_a: BigInt,
+    pub r_b: BigInt,
+    pub r_c: BigInt,
 }
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
