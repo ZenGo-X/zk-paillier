@@ -7,15 +7,17 @@ For each proof we state in comments what are the security assumptions required. 
 Currently implemented proofs
 -------------------
 
-* Proof of correct paillier keypair generation
-* Non-interactive proof of correct paillier keypair generation
-* Range proof that a paillier ciphertext lies in interval [0,q]
-* Non-interactive range proof that a paillier ciphertext lies in interval [0,q]
-* Proof of correct opening of a ciphertext
-* Proof that a ciphertext encrypts a message from a given message space
-* Witness Indistinguishable Proof of knowledge of discrete log with composite modulus
-* NI Proof of plaintext multiplication: ciphertexts `e_a = Enc(a), e_b = Enc(b), e_c = Enc(c)` such that `ab = c mod n`
-* NI proof of linear relation between several plaintexts of several known ciphertexts 
+* [Proof that a ciphertext encrypts zero](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/zero_enc_proof.rs)
+* [Proof of knowledge of plaintext (correctness of ciphertext)](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/correct_ciphertext.rs#L109)
+* [Proof of correct paillier keypair generation](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/correct_key.rs)
+* [Non-interactive proof of correct paillier keypair generation](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/correct_key_ni.rs)
+* [Range proof that a paillier ciphertext lies in interval [0,q]](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/range_proof.rs)
+* [Non-interactive range proof that a paillier ciphertext lies in interval [0,q]](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/range_proof_ni.rs)
+* [Proof of correct opening of a ciphertext](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/correct_opening.rs)
+* [Proof that a ciphertext encrypts a message from a given message space](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/correct_message.rs)
+* [Witness Indistinguishable Proof of knowledge of discrete log with composite modulus](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/wi_dlog_proof.rs)
+* [NI Proof of plaintext multiplication: ciphertexts `e_a = Enc(a), e_b = Enc(b), e_c = Enc(c)` such that `ab = c mod n`](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/multiplication_proof.rs)
+* [NI proof of linear relation between several plaintexts of several known ciphertexts](https://github.com/ZenGo-X/zk-paillier/blob/master/src/zkproofs/verlin_proof.rs)
 
 Usage
 -------------------
