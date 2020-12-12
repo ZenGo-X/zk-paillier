@@ -6,7 +6,8 @@ use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
 use serde::{Deserialize, Serialize};
 use std::iter;
-/// This proof shows that a paillier ciphertext was constructed correctly. It is the equivalent of DLog proof.
+/// This proof shows that a paillier ciphertext was constructed correctly
+/// The proof is taken from https://www.brics.dk/RS/00/14/BRICS-RS-00-14.pdf 9.1.3
 /// Given a ciphertext c and a prover encryption key , a prover wants to prove that it knows (x,r) such that c = Enc(x,r)
 /// 1) P picks x',r' at random, and computes c' = Enc(x', r')
 /// 2) P computes z1 = x' + ex , z2 = r' *r^e  (e is a varifier challenge)
