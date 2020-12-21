@@ -56,11 +56,8 @@ impl CompositeDLogProof {
                 .chain(iter::once(&statement.g))
                 .chain(iter::once(&statement.N)),
         );
-        let y = BigInt::mod_add(
-            &r,
-            &(BigInt::mod_mul(&e, secret, &&statement.N)),
-            &statement.N,
-        );
+        let y = &r + &e * secret;
+
         CompositeDLogProof { x, y }
     }
 
