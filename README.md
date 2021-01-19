@@ -32,7 +32,7 @@ Finally. we would like to thank [Morten Dahl](https://github.com/mortendahl),lea
 Development Process
 -------------------
  **the [Rust utilities wiki](https://github.com/KZen-networks/rust-utils/wiki) contains information on workflow and environment set-up**. 
-Feel free to [reach out](mailto:github@kzencorp.com) or join the KZen Research [Telegram]( https://t.me/kzen_research) for discussions on code and research.
+Feel free to [reach out](mailto:github@kzencorp.com) or join the KZen Research [Telegram](https://t.me/joinchat/ET1mddGXRoyCxZ-7) for discussions on code and research.
 
 License
 -------
