@@ -1,11 +1,12 @@
-use curv::arithmetic::traits::{Modulo, Samplable};
+use std::iter;
+
+use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::traits::{Add, Mul};
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
 use serde::{Deserialize, Serialize};
-use std::iter;
 
 /// The proof allows a prover to prove that a ciphertext is an encryption of zero.
 /// It is taken from DJ01 [https://www.brics.dk/RS/00/45/BRICS-RS-00-45.pdf]
@@ -89,16 +90,17 @@ impl ZeroProof {
 
 #[cfg(test)]
 mod tests {
-    use crate::zkproofs::zero_enc_proof::ZeroProof;
-    use crate::zkproofs::zero_enc_proof::ZeroStatement;
-    use crate::zkproofs::zero_enc_proof::ZeroWitness;
-    use curv::arithmetic::traits::Samplable;
+    use curv::arithmetic::traits::*;
     use curv::BigInt;
     use paillier::core::Randomness;
     use paillier::traits::EncryptWithChosenRandomness;
     use paillier::traits::KeyGeneration;
     use paillier::Paillier;
     use paillier::RawPlaintext;
+
+    use crate::zkproofs::zero_enc_proof::ZeroProof;
+    use crate::zkproofs::zero_enc_proof::ZeroStatement;
+    use crate::zkproofs::zero_enc_proof::ZeroWitness;
 
     #[test]
     fn test_zero_proof() {

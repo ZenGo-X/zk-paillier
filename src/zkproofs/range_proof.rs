@@ -15,7 +15,7 @@ use std::mem;
 
 use super::CorrectKeyProofError;
 use bit_vec::BitVec;
-use curv::arithmetic::traits::Samplable;
+use curv::arithmetic::traits::*;
 use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
 use curv::cryptographic_primitives::hashing::traits::Hash;
 use curv::BigInt;
@@ -403,7 +403,7 @@ fn get_paillier_commitment(ek: &EncryptionKey, x: &BigInt, r: &BigInt) -> BigInt
 }
 
 fn compute_digest(bytes: &[u8]) -> BigInt {
-    let input = BigInt::from(bytes);
+    let input = BigInt::from_bytes(bytes);
     HSha256::create_hash(&[&input])
 }
 
@@ -417,15 +417,15 @@ mod tests {
     const RANGE_BITS: usize = 256; //for elliptic curves with 256bits for example
 
     fn test_keypair() -> Keypair {
-        let p = str::parse("148677972634832330983979593310074301486537017973460461278300587514468301043894574906886127642530475786889672304776052879927627556769456140664043088700743909632312483413393134504352834240399191134336344285483935856491230340093391784574980688823380828143810804684752914935441384845195613674104960646037368551517").unwrap();
-        let q = str::parse("158741574437007245654463598139927898730476924736461654463975966787719309357536545869203069369466212089132653564188443272208127277664424448947476335413293018778018615899291704693105620242763173357203898195318179150836424196645745308205164116144020613415407736216097185962171301808761138424668335445923774195463").unwrap();
+        let p = BigInt::from_str_radix("148677972634832330983979593310074301486537017973460461278300587514468301043894574906886127642530475786889672304776052879927627556769456140664043088700743909632312483413393134504352834240399191134336344285483935856491230340093391784574980688823380828143810804684752914935441384845195613674104960646037368551517", 10).unwrap();
+        let q = BigInt::from_str_radix("158741574437007245654463598139927898730476924736461654463975966787719309357536545869203069369466212089132653564188443272208127277664424448947476335413293018778018615899291704693105620242763173357203898195318179150836424196645745308205164116144020613415407736216097185962171301808761138424668335445923774195463", 10).unwrap();
         Keypair { p, q }
     }
 
     #[test]
     fn test_generate_encrypted_pairs() {
         let (ek, _dk) = test_keypair().keys();
-        let range = BigInt::from(0x000F_FFFF_FFFF_FFFFi64);
+        let range = BigInt::from(0x000F_FFFF_FFFF_FFFFu64);
         RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
         //Paillier::verifier_commit();
     }
@@ -450,12 +450,12 @@ mod tests {
     fn test_generate_proof() {
         let (ek, _dk) = test_keypair().keys();
         let (verifier_ek, _verifier_dk) = test_keypair().keys();
-        let range = BigInt::from(0x000F_FFFF_FFFF_FFFFi64);
+        let range = BigInt::from(0x000F_FFFF_FFFF_FFFFu64);
         let (_com, _r, e) = RangeProof::verifier_commit(&verifier_ek);
         let (_encrypted_pairs, data_and_randmoness_pairs) =
             RangeProof::generate_encrypted_pairs(&ek, &range, STATISTICAL_ERROR_FACTOR);
         let secret_r = BigInt::sample_below(&ek.n);
-        let secret_x = BigInt::from(0x0FFF_FFFFi64);
+        let secret_x = BigInt::from(0x0FFF_FFFFu64);
         let _z_vector = RangeProof::generate_proof(
             &ek,
             &secret_x,
