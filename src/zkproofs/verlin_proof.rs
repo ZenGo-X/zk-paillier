@@ -1,11 +1,12 @@
-use curv::arithmetic::traits::{Modulo, Samplable};
+use std::iter;
+
+use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::traits::{Add, Mul};
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
 use serde::{Deserialize, Serialize};
-use std::iter;
 
 /// A sigma protocol to allow a prover to demonstrate that a ciphertext c_x has been computed using
 /// two other ciphertexts c_cprime, as well as a known value.
@@ -155,16 +156,17 @@ fn gen_phi(
 
 #[cfg(test)]
 mod tests {
-    use crate::zkproofs::verlin_proof::gen_phi;
-    use crate::zkproofs::verlin_proof::VerlinProof;
-    use crate::zkproofs::verlin_proof::VerlinStatement;
-    use crate::zkproofs::verlin_proof::VerlinWitness;
-    use curv::arithmetic::traits::Samplable;
+    use curv::arithmetic::traits::*;
     use curv::BigInt;
     use paillier::traits::Encrypt;
     use paillier::traits::KeyGeneration;
     use paillier::Paillier;
     use paillier::RawPlaintext;
+
+    use crate::zkproofs::verlin_proof::gen_phi;
+    use crate::zkproofs::verlin_proof::VerlinProof;
+    use crate::zkproofs::verlin_proof::VerlinStatement;
+    use crate::zkproofs::verlin_proof::VerlinWitness;
 
     #[test]
     fn test_verlin_proof() {

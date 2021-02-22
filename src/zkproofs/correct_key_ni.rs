@@ -46,7 +46,7 @@ impl NICorrectKeyProof {
             None => SALT_STRING,
         };
 
-        let salt_bn = super::compute_digest(iter::once(BigInt::from(salt)));
+        let salt_bn = super::compute_digest(iter::once(BigInt::from_bytes(salt)));
 
         // TODO: use flatten (Morten?)
         let rho_vec = (0..M2)
@@ -70,7 +70,7 @@ impl NICorrectKeyProof {
 
     pub fn verify(&self, ek: &EncryptionKey, salt_str: &[u8]) -> Result<(), CorrectKeyProofError> {
         let key_length = ek.n.bit_length() as usize;
-        let salt_bn = super::compute_digest(iter::once(BigInt::from(salt_str)));
+        let salt_bn = super::compute_digest(iter::once(BigInt::from_bytes(salt_str)));
 
         let rho_vec = (0..M2)
             .map(|i| {
@@ -82,7 +82,7 @@ impl NICorrectKeyProof {
                 mask_generation(key_length, &seed_bn) % &ek.n
             })
             .collect::<Vec<BigInt>>();
-        let alpha_primorial: BigInt = str::parse(&P).unwrap();
+        let alpha_primorial: BigInt = BigInt::from_str_radix(&P, 10).unwrap();
         let gcd_test = alpha_primorial.gcd(&ek.n);
 
         let derived_rho_vec = (0..M2)

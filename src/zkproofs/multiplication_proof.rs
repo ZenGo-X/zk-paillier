@@ -1,10 +1,11 @@
-use curv::arithmetic::traits::{Modulo, Samplable};
+use std::iter;
+
+use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawPlaintext};
 use serde::{Deserialize, Serialize};
-use std::iter;
 
 /// This proof is a non-interactive version of Multiplication-mod-n^s protocol taken from
 /// DJ01 [https://www.brics.dk/RS/00/45/BRICS-RS-00-45.pdf ]
@@ -85,7 +86,7 @@ impl MulProof {
         let r_b_f = BigInt::mod_pow(&witness.r_b, &f, &statement.ek.nn);
         let r_c_e = BigInt::mod_pow(&witness.r_c, &e, &statement.ek.nn);
         let r_db_r_c_e = BigInt::mod_mul(&r_db, &r_c_e, &statement.ek.nn);
-        let r_db_r_c_e_inv = r_db_r_c_e.invert(&statement.ek.nn).unwrap();
+        let r_db_r_c_e_inv = BigInt::mod_inv(&r_db_r_c_e, &statement.ek.nn).unwrap();
         let z2 = BigInt::mod_mul(&r_b_f, &r_db_r_c_e_inv, &statement.ek.nn);
 
         Ok(MulProof {
@@ -126,7 +127,7 @@ impl MulProof {
         let e_a_e_e_d = BigInt::mod_mul(&e_a_e, &self.e_d, &statement.ek.nn);
         let e_c_e = BigInt::mod_pow(&statement.e_c, &e, &statement.ek.nn);
         let e_db_e_c_e = BigInt::mod_mul(&self.e_db, &e_c_e, &statement.ek.nn);
-        let e_db_e_c_e_inv = e_db_e_c_e.invert(&statement.ek.nn).unwrap();
+        let e_db_e_c_e_inv = BigInt::mod_inv(&e_db_e_c_e, &statement.ek.nn).unwrap();
         let e_b_f = BigInt::mod_pow(&statement.e_b, &self.f, &statement.ek.nn);
         let e_b_f_e_db_e_c_e_inv = BigInt::mod_mul(&e_b_f, &e_db_e_c_e_inv, &statement.ek.nn);
 
@@ -147,17 +148,18 @@ fn sample_paillier_random(modulo: &BigInt) -> BigInt {
 
 #[cfg(test)]
 mod tests {
-    use crate::zkproofs::multiplication_proof::sample_paillier_random;
-    use crate::zkproofs::multiplication_proof::MulProof;
-    use crate::zkproofs::multiplication_proof::MulStatement;
-    use crate::zkproofs::multiplication_proof::MulWitness;
-    use curv::arithmetic::traits::{Modulo, Samplable};
+    use curv::arithmetic::traits::*;
     use curv::BigInt;
     use paillier::core::Randomness;
     use paillier::traits::EncryptWithChosenRandomness;
     use paillier::traits::KeyGeneration;
     use paillier::Paillier;
     use paillier::RawPlaintext;
+
+    use crate::zkproofs::multiplication_proof::sample_paillier_random;
+    use crate::zkproofs::multiplication_proof::MulProof;
+    use crate::zkproofs::multiplication_proof::MulStatement;
+    use crate::zkproofs::multiplication_proof::MulWitness;
 
     #[test]
     fn test_mul_proof() {

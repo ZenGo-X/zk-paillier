@@ -12,11 +12,12 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
 
-use curv::arithmetic::traits::{Modulo, Samplable};
+use std::iter;
+
+use curv::arithmetic::traits::*;
 use curv::cryptographic_primitives::proofs::ProofError;
 use curv::BigInt;
 use serde::{Deserialize, Serialize};
-use std::iter;
 
 // Witness Indistinguishable Proof of knowledge of discrete log with composite modulus.
 // We follow the Girault’s proof from Pointcheval paper (figure1):
@@ -89,7 +90,11 @@ impl CompositeDLogProof {
 
 pub fn legendre_symbol(a: &BigInt, p: &BigInt) -> i32 {
     let p_minus_1: BigInt = p - BigInt::one();
-    let pow = BigInt::mod_mul(&p_minus_1, &BigInt::from(2).invert(p).unwrap(), p);
+    let pow = BigInt::mod_mul(
+        &p_minus_1,
+        &BigInt::mod_inv(&BigInt::from(2), p).unwrap(),
+        p,
+    );
     let ls = BigInt::mod_pow(a, &pow, p);
     if ls == BigInt::one() {
         1
@@ -120,7 +125,8 @@ mod tests {
             jacobi_symbol = legendre_symbol(&h1, &dk.p) * legendre_symbol(&h1, &dk.q);
         }
         let secret = BigInt::sample_below(&S);
-        let h2 = BigInt::mod_pow(&h1, &(-&secret), &ek.n);
+        let h1_inv = BigInt::mod_inv(&h1, &ek.n).unwrap();
+        let h2 = BigInt::mod_pow(&h1_inv, &secret, &ek.n);
         let statement = DLogStatement {
             N: ek.n,
             g: h1,
