@@ -38,7 +38,7 @@ pub use self::correct_key_ni::SALT_STRING;
 
 mod correct_key_ni;
 pub use self::correct_key_ni::CorrectKeyProofError;
-pub use self::correct_key_ni::NICorrectKeyProof;
+pub use self::correct_key_ni::NiCorrectKeyProof;
 mod range_proof;
 pub use self::range_proof::RangeProof;
 pub use self::range_proof::RangeProofTrait;

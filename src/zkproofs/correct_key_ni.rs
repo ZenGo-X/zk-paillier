@@ -30,14 +30,15 @@ const M2: usize = 11;
 const DIGEST_SIZE: usize = 256;
 #[derive(Debug)]
 pub struct CorrectKeyProofError;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct NICorrectKeyProof {
+pub struct NiCorrectKeyProof {
     #[serde(with = "crate::serialize::vecbigint")]
     pub sigma_vec: Vec<BigInt>,
 }
 
-impl NICorrectKeyProof {
-    pub fn proof(dk: &DecryptionKey, salt_str: Option<&'static [u8]>) -> NICorrectKeyProof {
+impl NiCorrectKeyProof {
+    pub fn proof(dk: &DecryptionKey, salt_str: Option<&'static [u8]>) -> NiCorrectKeyProof {
         let dk_n = &dk.q * &dk.p;
         let key_length = dk_n.bit_length();
 
@@ -65,7 +66,7 @@ impl NICorrectKeyProof {
             .iter()
             .map(|i| extract_nroot(dk, i))
             .collect::<Vec<BigInt>>();
-        NICorrectKeyProof { sigma_vec }
+        NiCorrectKeyProof { sigma_vec }
     }
 
     pub fn verify(&self, ek: &EncryptionKey, salt_str: &[u8]) -> Result<(), CorrectKeyProofError> {
@@ -123,7 +124,7 @@ mod tests {
     #[test]
     fn test_correct_zk_proof_no_salt_str() {
         let (ek, dk) = Paillier::keypair().keys();
-        let proof = NICorrectKeyProof::proof(&dk, None);
+        let proof = NiCorrectKeyProof::proof(&dk, None);
         assert!(proof.verify(&ek, SALT_STRING).is_ok());
     }
 
@@ -131,7 +132,7 @@ mod tests {
     fn test_correct_zk_proof_with_salt_str() {
         let salt_str: &[u8] = &[90, 101, 110, 32, 71, 111, 32, 88];
         let (ek, dk) = Paillier::keypair().keys();
-        let proof = NICorrectKeyProof::proof(&dk, Some(salt_str));
+        let proof = NiCorrectKeyProof::proof(&dk, Some(salt_str));
         assert!(proof.verify(&ek, salt_str).is_ok());
     }
 }
