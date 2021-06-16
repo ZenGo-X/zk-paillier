@@ -26,8 +26,8 @@ digest = "0.8.1"
 curv = { package = "curv-kzen", version = "0.7", default-features = false }
 
 [dependencies.paillier]
-git = "https://github.com/KZen-networks/rust-paillier"
-tag = "v0.3.10"
+package = "kzen-paillier"
+version = "0.4"
 default-features = false
 
 [dev-dependencies]
