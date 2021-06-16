@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.com/ZenGo-X/zk-paillier.svg?branch=master)](https://travis-ci.com/ZenGo-X/zk-paillier)
+[![Latest version](https://img.shields.io/crates/v/zk-paillier.svg)](https://crates.io/crates/kzen-paillier)
+[![Docs](https://docs.rs/zk-paillier/badge.svg)](https://docs.rs/zk-paillier)
+[![License](https://img.shields.io/crates/l/zk-paillier)](LICENSE)
+
 Zero Knowledge Paillier
 -------------------
 This library contains a collection of Paillier cryptosystem zero knowledge proofs written in Rust. 
@@ -32,12 +37,14 @@ Finally. we would like to thank [Morten Dahl](https://github.com/mortendahl),lea
 Development Process
 -------------------
  **the [Rust utilities wiki](https://github.com/KZen-networks/rust-utils/wiki) contains information on workflow and environment set-up**. 
+
 Feel free to [reach out](mailto:github@kzencorp.com) or join the KZen Research [Telegram](https://t.me/joinchat/ET1mddGXRoyCxZ-7) for discussions on code and research.
 
 License
 -------
 zk-paillier is released under the terms of the GPL-3.0 license. See [LICENSE](LICENSE) for more information.
 
-## Contact
+Contact
+-------
 
-Feel free to [reach out](mailto:github@kzencorp.com) or join ZenGo X [Telegram](https://t.me/zengo_x) for discussions on code and research.
+Feel free to [reach out](mailto:github@kzencorp.com) or join the KZen Research [Telegram](https://t.me/joinchat/ET1mddGXRoyCxZ-7) for discussions on code and research.
