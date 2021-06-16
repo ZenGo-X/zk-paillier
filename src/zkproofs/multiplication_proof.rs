@@ -71,7 +71,7 @@ impl MulProof {
         let db = &d * &witness.b;
         let e_db = Paillier::encrypt_with_chosen_randomness(
             &statement.ek,
-            RawPlaintext::from(db.clone()),
+            RawPlaintext::from(db),
             &Randomness(r_db.clone()),
         )
         .0

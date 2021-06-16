@@ -55,8 +55,7 @@ impl RangeProofNi {
             RangeProof::generate_encrypted_pairs(ek, range, SECURITY_PARAMETER);
         let (c1, c2) = (encrypted_pairs.c1, encrypted_pairs.c2); // TODO[Morten] fix temporary hack
 
-        let mut vec: Vec<BigInt> = Vec::new();
-        vec.push(ek.n.clone());
+        let mut vec: Vec<BigInt> = vec![ek.n.clone()];
         vec.extend_from_slice(&c1);
         vec.extend_from_slice(&c2);
         let e = ChallengeBits::from(BigInt::to_bytes(&super::compute_digest(vec.iter())));
@@ -87,8 +86,7 @@ impl RangeProofNi {
         assert_eq!(ek, &self.ek);
         // make sure proof was done with the same ciphertext
         assert_eq!(ciphertext, &self.ciphertext);
-        let mut vec: Vec<BigInt> = Vec::new();
-        vec.push(ek.n.clone());
+        let mut vec: Vec<BigInt> = vec![ek.n.clone()];
         vec.extend_from_slice(&self.encrypted_pairs.c1);
         vec.extend_from_slice(&self.encrypted_pairs.c2);
         let e = ChallengeBits::from(BigInt::to_bytes(&super::compute_digest(vec.iter())));
@@ -109,8 +107,7 @@ impl RangeProofNi {
     }
 
     pub fn verify_self(&self) -> Result<(), IncorrectProof> {
-        let mut vec: Vec<BigInt> = Vec::new();
-        vec.push(self.ek.n.clone());
+        let mut vec: Vec<BigInt> = vec![self.ek.n.clone()];
         vec.extend_from_slice(&self.encrypted_pairs.c1);
         vec.extend_from_slice(&self.encrypted_pairs.c2);
         let e = ChallengeBits::from(BigInt::to_bytes(&super::compute_digest(vec.iter())));

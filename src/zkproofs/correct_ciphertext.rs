@@ -80,7 +80,7 @@ impl CiphertextProof {
 
         let c_e = Paillier::mul(
             &statement.ek,
-            RawPlaintext::from(e.clone()),
+            RawPlaintext::from(e),
             RawCiphertext::from(statement.c.clone()),
         );
         let c_z_test = Paillier::add(

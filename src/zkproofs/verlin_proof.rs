@@ -109,7 +109,7 @@ impl VerlinProof {
         let phi_x_e = Paillier::mul(
             &statement.ek,
             RawCiphertext::from(statement.phi_x.clone()),
-            RawPlaintext::from(e.clone()),
+            RawPlaintext::from(e),
         );
         let phi_x_e_phi_a = Paillier::add(
             &statement.ek,
