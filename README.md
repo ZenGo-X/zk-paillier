@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.com/ZenGo-X/zk-paillier.svg?branch=master)](https://travis-ci.com/ZenGo-X/zk-paillier)
-[![Latest version](https://img.shields.io/crates/v/zk-paillier.svg)](https://crates.io/crates/kzen-paillier)
+[![Latest version](https://img.shields.io/crates/v/zk-paillier.svg)](https://crates.io/crates/zk-paillier)
 [![Docs](https://docs.rs/zk-paillier/badge.svg)](https://docs.rs/zk-paillier)
 [![License](https://img.shields.io/crates/l/zk-paillier)](LICENSE)
 
