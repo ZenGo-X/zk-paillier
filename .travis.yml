@@ -1,0 +1,21 @@
+language: rust
+cache: cargo
+rust: stable
+virt: lxd
+
+before_install:
+  - rustup component add rustfmt clippy
+
+script:
+  - cargo build --verbose
+  - cargo test --verbose
+  - cargo fmt --all -- --check
+  - cargo clippy -- -D clippy::all
+
+deploy:
+  provider: cargo
+  token:
+    secure: "dZsDkMfprxg3qSsmZvvEYw7jCSfWbxJDr73nHE4qRqAp56hRg87QoTN7ZTP4eOvdSmFsIZlslckq+ShERN3mVzuvcVEQiH7DpMtBDq7pFRKy3T8KAfxRUXknBRk6tpxq5kNPgcUGrGkjvXaHixPFRHUBx6cmHFS0DZClq8bJvDLwBHBfGAZ5vLcn2bLt0rIga1U8qNvkZpRy5TnDfTirl8l0pX+IMIAFBMHfEzzm/KRMMeMcPO4lOSNkAbIchEYZGgpuz0z3hy2vUt7sGCUYVAXMRHJZqs5LpFQFnpvwfWRyHNgGv3S7j3kIhtvD6kqZ4zb+wbF3jsbtpVuFKPPatEO1Sw6lAJQ0r7RYflWN5E93qVGatRlWVARPjYpRlvtxYf+xX1sZkQfcQ7h78mVoZVdnxTA7p04E3LGKmyrGQJz0fjxisMONv4BVYcJY57WcRzXu3vM0+mZ7dkzkbBDnAyXGyYLZ2M2r2Kg1Bj/8iMQUni/kUPN4bZ9hAV8ShfwgR0OHZmyNgj0qUWijOjiHtKo01Zp7NhJ7K5MvYfCRJTYuJIFoMQ/W7MCWX8nbYCt3L8RZcwWo8K4ATrOX4FttleSrpmOwCtlYdUA+Teupe9q04TAtvQaVYnUPT0bVfnDj4LWZg9HfZh/M/gNi1TdJshdVIREwdlmoXePrqKATpac="
+  on:
+    tags: true
+    condition: "$TRAVIS_TAG =~ ^v[0-9.]+$"

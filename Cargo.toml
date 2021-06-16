@@ -1,17 +1,18 @@
 [package]
 name = "zk-paillier"
-version = "0.3.12"
+version = "0.4.0"
 edition = "2018"
+description = "Collection of Paillier cryptosystem zero knowledge proofs written in Rust"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/ZenGo-X/zk-paillier"
+categories = ["cryptography", "algorithms"]
+keywords = ["paillier", "homomorphic", "encryption", "zero-knowledge", "cryptoagorithms"]
 
 authors = [
     "Gary <gary@kzencorp.com>",
     "Morten Dahl <mortendahlcs@gmail.com>",
     "Omer <omer.shlomovits@gmail.com>"
 ]
-keywords = ["paillier", "zero knowledge"]
-
-license = "GPL-3.0-or-later"
-categories = ["cryptography"]
 
 [lib]
 crate-type = ["lib"]
@@ -24,7 +25,11 @@ bit-vec = "0.6"
 sha2 = "0.8.0"
 digest = "0.8.1"
 thiserror = "1"
-curv = { package = "curv-kzen", version = "0.7", default-features = false }
+
+[dependencies.curv]
+package = "curv-kzen"
+version = "0.7"
+default-features = false
 
 [dependencies.paillier]
 package = "kzen-paillier"
