@@ -1,27 +1,34 @@
 use std::iter;
 
+use serde::{Deserialize, Serialize};
+
 use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawPlaintext};
-use serde::{Deserialize, Serialize};
+
+use super::errors::IncorrectProof;
 
 /// This proof is a non-interactive version of Multiplication-mod-n^s protocol taken from
 /// DJ01 [https://www.brics.dk/RS/00/45/BRICS-RS-00-45.pdf ]
-/// the prover knows 3 plaintexts a,b,c such that ab = c mod n. The prover goal is to prove that a
+///
+/// The prover knows 3 plaintexts a,b,c such that ab = c mod n. The prover goal is to prove that a
 /// triplet of ciphertexts encrypts plaintexts a,b,c holding the multiplication relationship
+///
 /// Witness: {a,b,c,r_a,r_b,r_c}
+///
 /// Statement: {e_a, e_b, e_c, ek}
-/// protocol:
-/// 1) P picks random values d from Z_n, r_d from Z_n*
+///
+/// Protocol:
+///
+/// 1. P picks random values d from Z_n, r_d from Z_n*
 ///    and computes e_d = Enc_ek(d,r_d), e_db = Enc_ek(db, r_d*r_b)
-/// 2) using Fiat-Shamir the parties computes a challenge e
-/// 3) P sends f = ea + d mod n , z1 = r_a^e *r_d mod n^2, z2 = r_b^f * (r_db * r_c^e)^-1 mod n^2
-/// 4) V checks:
+/// 2. using Fiat-Shamir the parties computes a challenge e
+/// 3. P sends f = ea + d mod n , z1 = r_a^e *r_d mod n^2, z2 = r_b^f * (r_db * r_c^e)^-1 mod n^2
+/// 4. V checks:
 ///     e_a^e * e_d = Enc_ek(f, z1),
 ///     e_b^f*(e_db*e_c^e)^-1 = Enc_pk(0, z2)
-
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct MulProof {
     pub f: BigInt,
@@ -50,7 +57,7 @@ pub struct MulStatement {
 }
 
 impl MulProof {
-    pub fn prove(witness: &MulWitness, statement: &MulStatement) -> Result<Self, ()> {
+    pub fn prove(witness: &MulWitness, statement: &MulStatement) -> Self {
         let d = BigInt::sample_below(&statement.ek.n);
         let r_d = sample_paillier_random(&statement.ek.n);
         let e_d = Paillier::encrypt_with_chosen_randomness(
@@ -64,7 +71,7 @@ impl MulProof {
         let db = &d * &witness.b;
         let e_db = Paillier::encrypt_with_chosen_randomness(
             &statement.ek,
-            RawPlaintext::from(db.clone()),
+            RawPlaintext::from(db),
             &Randomness(r_db.clone()),
         )
         .0
@@ -89,16 +96,16 @@ impl MulProof {
         let r_db_r_c_e_inv = BigInt::mod_inv(&r_db_r_c_e, &statement.ek.nn).unwrap();
         let z2 = BigInt::mod_mul(&r_b_f, &r_db_r_c_e_inv, &statement.ek.nn);
 
-        Ok(MulProof {
+        MulProof {
             f,
             z1,
             z2,
             e_d,
             e_db,
-        })
+        }
     }
 
-    pub fn verify(&self, statement: &MulStatement) -> Result<(), ()> {
+    pub fn verify(&self, statement: &MulStatement) -> Result<(), IncorrectProof> {
         let e = super::compute_digest(
             iter::once(&statement.ek.n)
                 .chain(iter::once(&statement.e_a))
@@ -133,7 +140,7 @@ impl MulProof {
 
         match e_a_e_e_d == enc_f_z1 && e_b_f_e_db_e_c_e_inv == enc_0_z2 {
             true => Ok(()),
-            false => Err(()),
+            false => Err(IncorrectProof),
         }
     }
 }
@@ -206,7 +213,7 @@ mod tests {
 
         let statement = MulStatement { ek, e_a, e_b, e_c };
 
-        let proof = MulProof::prove(&witness, &statement).unwrap();
+        let proof = MulProof::prove(&witness, &statement);
         let verify = proof.verify(&statement);
         assert!(verify.is_ok());
     }
@@ -259,7 +266,7 @@ mod tests {
 
         let statement = MulStatement { ek, e_a, e_b, e_c };
 
-        let proof = MulProof::prove(&witness, &statement).unwrap();
+        let proof = MulProof::prove(&witness, &statement);
         let verify = proof.verify(&statement);
         assert!(verify.is_ok());
     }

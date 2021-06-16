@@ -1,19 +1,24 @@
+use std::iter;
+
+use serde::{Deserialize, Serialize};
+
 use curv::arithmetic::traits::{Modulo, Samplable};
 use curv::BigInt;
 use paillier::traits::{Add, Mul};
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
-use serde::{Deserialize, Serialize};
-use std::iter;
+
+use super::errors::IncorrectProof;
+
 /// This proof shows that a paillier ciphertext was constructed correctly
+///
 /// The proof is taken from https://www.brics.dk/RS/00/14/BRICS-RS-00-14.pdf 9.1.3
 /// Given a ciphertext c and a prover encryption key , a prover wants to prove that it knows (x,r) such that c = Enc(x,r)
 /// 1) P picks x',r' at random, and computes c' = Enc(x', r')
 /// 2) P computes z1 = x' + ex , z2 = r' *r^e  (e is a varifier challenge)
 /// 3) P sends, c' , z1,z2
 /// 4) V accepts if 1) Enc(z1,z2 ) = c' * c^e
-
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct CiphertextProof {
     pub z1: BigInt,
@@ -34,7 +39,7 @@ pub struct CiphertextStatement {
 }
 
 impl CiphertextProof {
-    pub fn prove(witness: &CiphertextWitness, statement: &CiphertextStatement) -> Result<Self, ()> {
+    pub fn prove(witness: &CiphertextWitness, statement: &CiphertextStatement) -> Self {
         let x_prime = BigInt::sample_below(&statement.ek.n);
         let r_prime = BigInt::sample_below(&statement.ek.n);
         let c_prime = Paillier::encrypt_with_chosen_randomness(
@@ -55,10 +60,10 @@ impl CiphertextProof {
         let r_e = BigInt::mod_pow(&witness.r, &e, &statement.ek.nn);
         let z2 = BigInt::mod_mul(&r_prime, &r_e, &statement.ek.nn);
 
-        Ok(CiphertextProof { z1, z2, c_prime })
+        CiphertextProof { z1, z2, c_prime }
     }
 
-    pub fn verify(&self, statement: &CiphertextStatement) -> Result<(), ()> {
+    pub fn verify(&self, statement: &CiphertextStatement) -> Result<(), IncorrectProof> {
         let e = super::compute_digest(
             iter::once(&statement.ek.n)
                 .chain(iter::once(&statement.c))
@@ -75,7 +80,7 @@ impl CiphertextProof {
 
         let c_e = Paillier::mul(
             &statement.ek,
-            RawPlaintext::from(e.clone()),
+            RawPlaintext::from(e),
             RawCiphertext::from(statement.c.clone()),
         );
         let c_z_test = Paillier::add(
@@ -88,7 +93,7 @@ impl CiphertextProof {
 
         match c_z == c_z_test {
             true => Ok(()),
-            false => Err(()),
+            false => Err(IncorrectProof),
         }
     }
 }
@@ -125,7 +130,7 @@ mod tests {
 
         let statement = CiphertextStatement { ek, c };
 
-        let proof = CiphertextProof::prove(&witness, &statement).unwrap();
+        let proof = CiphertextProof::prove(&witness, &statement);
         let verify = proof.verify(&statement);
         assert!(verify.is_ok());
     }
@@ -152,7 +157,7 @@ mod tests {
 
         let statement = CiphertextStatement { ek, c };
 
-        let proof = CiphertextProof::prove(&witness, &statement).unwrap();
+        let proof = CiphertextProof::prove(&witness, &statement);
         let verify = proof.verify(&statement);
         assert!(verify.is_ok());
     }

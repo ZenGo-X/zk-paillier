@@ -10,19 +10,18 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
-use std::error::Error;
-use std::fmt;
 
 use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::EncryptionKey;
 use serde::{Deserialize, Serialize};
 
+use super::errors::IncorrectProof;
 use super::range_proof::RangeProof;
-use super::range_proof::RangeProofTrait;
 use super::range_proof::{ChallengeBits, EncryptedPairs, Proof};
 
 const SECURITY_PARAMETER: usize = 128;
+
 /// Zero-knowledge range proof that a value x<q/3 lies in interval [0,q].
 ///
 /// The verifier is given only c = ENC(ek,x).
@@ -34,23 +33,6 @@ const SECURITY_PARAMETER: usize = 128;
 /// - Section 1.2.2 in [Boudot '00](https://www.iacr.org/archive/eurocrypt2000/1807/18070437-new.pdf)
 ///
 /// This is a non-interactive version of the proof, using Fiat Shamir Transform and assuming Random Oracle Model
-
-// TODO: use error chain
-#[derive(Debug)]
-pub struct RangeProofError;
-
-impl fmt::Display for RangeProofError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "ProofError")
-    }
-}
-
-impl Error for RangeProofError {
-    fn description(&self) -> &str {
-        "range proof error"
-    }
-}
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RangeProofNi {
     ek: EncryptionKey,
@@ -73,8 +55,7 @@ impl RangeProofNi {
             RangeProof::generate_encrypted_pairs(ek, range, SECURITY_PARAMETER);
         let (c1, c2) = (encrypted_pairs.c1, encrypted_pairs.c2); // TODO[Morten] fix temporary hack
 
-        let mut vec: Vec<BigInt> = Vec::new();
-        vec.push(ek.n.clone());
+        let mut vec: Vec<BigInt> = vec![ek.n.clone()];
         vec.extend_from_slice(&c1);
         vec.extend_from_slice(&c2);
         let e = ChallengeBits::from(BigInt::to_bytes(&super::compute_digest(vec.iter())));
@@ -100,13 +81,12 @@ impl RangeProofNi {
         }
     }
 
-    pub fn verify(&self, ek: &EncryptionKey, ciphertext: &BigInt) -> Result<(), RangeProofError> {
+    pub fn verify(&self, ek: &EncryptionKey, ciphertext: &BigInt) -> Result<(), IncorrectProof> {
         // make sure proof was done with the same public key
         assert_eq!(ek, &self.ek);
         // make sure proof was done with the same ciphertext
         assert_eq!(ciphertext, &self.ciphertext);
-        let mut vec: Vec<BigInt> = Vec::new();
-        vec.push(ek.n.clone());
+        let mut vec: Vec<BigInt> = vec![ek.n.clone()];
         vec.extend_from_slice(&self.encrypted_pairs.c1);
         vec.extend_from_slice(&self.encrypted_pairs.c2);
         let e = ChallengeBits::from(BigInt::to_bytes(&super::compute_digest(vec.iter())));
@@ -122,13 +102,12 @@ impl RangeProofNi {
         if result.is_ok() {
             Ok(())
         } else {
-            Err(RangeProofError)
+            Err(IncorrectProof)
         }
     }
 
-    pub fn verify_self(&self) -> Result<(), RangeProofError> {
-        let mut vec: Vec<BigInt> = Vec::new();
-        vec.push(self.ek.n.clone());
+    pub fn verify_self(&self) -> Result<(), IncorrectProof> {
+        let mut vec: Vec<BigInt> = vec![self.ek.n.clone()];
         vec.extend_from_slice(&self.encrypted_pairs.c1);
         vec.extend_from_slice(&self.encrypted_pairs.c2);
         let e = ChallengeBits::from(BigInt::to_bytes(&super::compute_digest(vec.iter())));
@@ -144,7 +123,7 @@ impl RangeProofNi {
         if result.is_ok() {
             Ok(())
         } else {
-            Err(RangeProofError)
+            Err(IncorrectProof)
         }
     }
 }

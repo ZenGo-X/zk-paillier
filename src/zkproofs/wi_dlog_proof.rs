@@ -15,19 +15,20 @@
 use std::iter;
 
 use curv::arithmetic::traits::*;
-use curv::cryptographic_primitives::proofs::ProofError;
 use curv::BigInt;
 use serde::{Deserialize, Serialize};
 
-// Witness Indistinguishable Proof of knowledge of discrete log with composite modulus.
-// We follow the Girault’s proof from Pointcheval paper (figure1):
-// https://www.di.ens.fr/david.pointcheval/Documents/Papers/2000_pkcA.pdf
-// The prover wants to prove knowledge of a secret s given a public v = g^-{s} mod N for composite N
+use super::errors::IncorrectProof;
 
 const K: usize = 128;
 const K_PRIME: usize = 128;
 const SAMPLE_S: usize = 256;
 
+/// Witness Indistinguishable Proof of knowledge of discrete log with composite modulus.
+///
+/// We follow the Girault’s proof from Pointcheval paper (figure1):
+/// https://www.di.ens.fr/david.pointcheval/Documents/Papers/2000_pkcA.pdf
+/// The prover wants to prove knowledge of a secret s given a public v = g^-{s} mod N for composite N
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CompositeDLogProof {
     pub x: BigInt,
@@ -62,7 +63,7 @@ impl CompositeDLogProof {
         CompositeDLogProof { x, y }
     }
 
-    pub fn verify(&self, statement: &DLogStatement) -> Result<(), ProofError> {
+    pub fn verify(&self, statement: &DLogStatement) -> Result<(), IncorrectProof> {
         //assert N > 2^k
         assert!(statement.N > BigInt::from(2).pow(K as u32));
 
@@ -83,7 +84,7 @@ impl CompositeDLogProof {
         if self.x == g_y_ni_e {
             Ok(())
         } else {
-            Err(ProofError)
+            Err(IncorrectProof)
         }
     }
 }

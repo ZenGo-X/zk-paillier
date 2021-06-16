@@ -1,26 +1,36 @@
 use std::iter;
 
+use serde::{Deserialize, Serialize};
+
 use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::traits::{Add, Mul};
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
 use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
-use serde::{Deserialize, Serialize};
+
+use super::errors::IncorrectProof;
 
 /// A sigma protocol to allow a prover to demonstrate that a ciphertext c_x has been computed using
 /// two other ciphertexts c_cprime, as well as a known value.
+///
 /// The proof is taken from https://eprint.iacr.org/2011/494.pdf 3.3.1
+///
 /// Witness: {x,x_prime, x_double_prime, r_x}
-/// Statement: {c_x, c, c_prime}. The relation is such that:
+///
+/// Statement: {c_x, c, c_prime}.
+///
+/// The relation is such that:
 /// phi_x = c^x * c_prime^x_prime * Enc(x_double_prime, r_x)
+///
 /// The protocol:
-/// 1) Prover picks random: a,a_prime,a_double_prime and r_a and computes: phi_a
-/// 2) prover computes a challenge e using Fiat-Shamir
-/// 3) Prover computes  z = xe + a, z' = x'e + a', z_double_prime = x_double_prime*e + a_double_prime
-/// and r_z = r_x^e*r_a
+///
+/// 1. Prover picks random: a,a_prime,a_double_prime and r_a and computes: phi_a
+/// 2. prover computes a challenge e using Fiat-Shamir
+/// 3. Prover computes  z = xe + a, z' = x'e + a', z_double_prime = x_double_prime*e + a_double_prime
+///    and r_z = r_x^e*r_a
+///
 /// Verifier accepts if phi_z = phi_x^e * phi_a
-
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct VerlinProof {
     pub phi_a: BigInt,
@@ -47,7 +57,7 @@ pub struct VerlinStatement {
 }
 
 impl VerlinProof {
-    pub fn prove(witness: &VerlinWitness, statement: &VerlinStatement) -> Result<Self, ()> {
+    pub fn prove(witness: &VerlinWitness, statement: &VerlinStatement) -> Self {
         let a = BigInt::sample_below(&statement.ek.n);
         let a_prime = BigInt::sample_below(&statement.ek.n);
         let a_double_prime = BigInt::sample_below(&statement.ek.n);
@@ -79,16 +89,16 @@ impl VerlinProof {
         let r_x_e = BigInt::mod_pow(&witness.r_x, &e, &statement.ek.nn);
         let r_z = BigInt::mod_mul(&r_x_e, &r_a, &statement.ek.nn);
 
-        Ok(VerlinProof {
+        VerlinProof {
             phi_a,
             z,
             z_prime,
             z_double_prime,
             r_z,
-        })
+        }
     }
 
-    pub fn verify(&self, statement: &VerlinStatement) -> Result<(), ()> {
+    pub fn verify(&self, statement: &VerlinStatement) -> Result<(), IncorrectProof> {
         let e = super::compute_digest(
             iter::once(&statement.ek.n)
                 .chain(iter::once(&statement.c))
@@ -99,7 +109,7 @@ impl VerlinProof {
         let phi_x_e = Paillier::mul(
             &statement.ek,
             RawCiphertext::from(statement.phi_x.clone()),
-            RawPlaintext::from(e.clone()),
+            RawPlaintext::from(e),
         );
         let phi_x_e_phi_a = Paillier::add(
             &statement.ek,
@@ -119,7 +129,7 @@ impl VerlinProof {
 
         match phi_z == phi_x_e_phi_a.0.into_owned() {
             true => Ok(()),
-            false => Err(()),
+            false => Err(IncorrectProof),
         }
     }
 }
@@ -199,7 +209,7 @@ mod tests {
             phi_x,
         };
 
-        let proof = VerlinProof::prove(&witness, &statement).unwrap();
+        let proof = VerlinProof::prove(&witness, &statement);
         let verify = proof.verify(&statement);
         assert!(verify.is_ok());
     }
@@ -245,7 +255,7 @@ mod tests {
             phi_x,
         };
 
-        let proof = VerlinProof::prove(&witness, &statement).unwrap();
+        let proof = VerlinProof::prove(&witness, &statement);
         let verify = proof.verify(&statement);
         assert!(verify.is_ok());
     }
@@ -291,7 +301,7 @@ mod tests {
             phi_x,
         };
 
-        let proof = VerlinProof::prove(&witness, &statement).unwrap();
+        let proof = VerlinProof::prove(&witness, &statement);
         let verify = proof.verify(&statement);
         assert!(verify.is_ok());
     }

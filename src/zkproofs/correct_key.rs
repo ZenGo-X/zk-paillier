@@ -10,35 +10,20 @@
 
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
-use std::borrow::Borrow;
-use std::error::Error;
-use std::fmt;
 use std::iter;
+
+use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::{extract_nroot, DecryptionKey, EncryptionKey};
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
+
+use super::errors::IncorrectProof;
+use super::utils::compute_digest;
 
 const STATISTICAL_ERROR_FACTOR: usize = 40;
-
-// TODO: generalize the error string and move the struct to a common location where all other proofs can use it as well
-// TODO[Morten]: better: use error chain!
-#[derive(Debug)]
-pub struct CorrectKeyProofError;
-
-impl fmt::Display for CorrectKeyProofError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "ProofError")
-    }
-}
-
-impl Error for CorrectKeyProofError {
-    fn description(&self) -> &str {
-        "Error while verifying"
-    }
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Challenge {
@@ -73,20 +58,10 @@ pub struct CorrectKeyProof {
 /// - section 3.1 in [Lindell'17](https://eprint.iacr.org/2017/552)
 /// - section 3.3 in [HMRTN'12](https://eprint.iacr.org/2011/494)
 /// - section 4.2 in [DJ'01](http://www.brics.dk/RS/00/45/BRICS-RS-00-45.pdf)
-pub trait CorrectKeyTrait<EK, DK> {
-    /// Generate challenge for given encryption key.
-    fn challenge(ek: &EK) -> (Challenge, VerificationAid);
-
-    /// Generate proof given decryption key.
-    fn prove(dk: &DK, challenge: &Challenge) -> Result<CorrectKeyProof, CorrectKeyProofError>;
-
-    /// Verify proof.
-    fn verify(proof: &CorrectKeyProof, aid: &VerificationAid) -> Result<(), CorrectKeyProofError>;
-}
-
 pub struct CorrectKey;
-impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
-    fn challenge(ek: &EncryptionKey) -> (Challenge, VerificationAid) {
+
+impl CorrectKey {
+    pub fn challenge(ek: &EncryptionKey) -> (Challenge, VerificationAid) {
         // Compute challenges in the form of n-powers
 
         let s: Vec<_> = (0..STATISTICAL_ERROR_FACTOR)
@@ -126,25 +101,28 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
         (Challenge { sn, e, z }, VerificationAid { s_digest })
     }
 
-    fn prove(
+    pub fn prove(
         dk: &DecryptionKey,
         challenge: &Challenge,
-    ) -> Result<CorrectKeyProof, CorrectKeyProofError> {
-        let mut fail = false; // !!! Do not change
+    ) -> Result<CorrectKeyProof, CorrectKeyProveError> {
         let dk_n = &dk.q * &dk.p;
         // check sn co-prime with n
-        fail = challenge
+        let not_coprime = challenge
             .sn
             .par_iter()
-            .any(|sni| BigInt::egcd(&dk_n, sni).0 != BigInt::one())
-            || fail;
+            .any(|sni| BigInt::egcd(&dk_n, sni).0 != BigInt::one());
+        if not_coprime {
+            return Err(CorrectKeyProveError::SniNotCoprimeWithN);
+        }
 
         // check z co-prime with n
-        fail = challenge
+        let not_coprime = challenge
             .z
             .par_iter()
-            .any(|zi| BigInt::egcd(&dk_n, zi).0 != BigInt::one())
-            || fail;
+            .any(|zi| BigInt::egcd(&dk_n, zi).0 != BigInt::one());
+        if not_coprime {
+            return Err(CorrectKeyProveError::ZiNotCoprimeWithN);
+        }
 
         // reconstruct rn
         let phi = (dk.q.clone() - 1) * (dk.p.clone() - 1);
@@ -162,17 +140,19 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
             .collect();
 
         // check rn co-prime with n
-        fail = rn
+        let not_coprime = rn
             .par_iter()
-            .any(|rni| BigInt::egcd(&dk_n, rni).0 != BigInt::one())
-            || fail;
+            .any(|rni| BigInt::egcd(&dk_n, rni).0 != BigInt::one());
+        if not_coprime {
+            return Err(CorrectKeyProveError::RniNotCoprimeWithN);
+        }
 
         // check that e was computed correctly
         let e = compute_digest(iter::once(&dk_n).chain(&challenge.sn).chain(&rn));
-        fail = (challenge.e != e) || fail;
+        let wasnt_computed_correctly = challenge.e != e;
 
-        if fail {
-            return Err(CorrectKeyProofError);
+        if wasnt_computed_correctly {
+            return Err(CorrectKeyProveError::EWasntComputedCorrectly);
         }
 
         // compute proof in the form of a hash of the recovered roots
@@ -181,32 +161,26 @@ impl CorrectKeyTrait<EncryptionKey, DecryptionKey> for CorrectKey {
         Ok(CorrectKeyProof { s_digest })
     }
 
-    fn verify(proof: &CorrectKeyProof, va: &VerificationAid) -> Result<(), CorrectKeyProofError> {
+    pub fn verify(proof: &CorrectKeyProof, va: &VerificationAid) -> Result<(), IncorrectProof> {
         // compare actual with expected
         if proof.s_digest == va.s_digest {
             Ok(())
         } else {
-            Err(CorrectKeyProofError)
+            Err(IncorrectProof)
         }
     }
 }
 
-use digest::Digest;
-use sha2::Sha256;
-
-pub fn compute_digest<IT>(it: IT) -> BigInt
-where
-    IT: Iterator,
-    IT::Item: Borrow<BigInt>,
-{
-    let mut hasher = Sha256::new();
-    for value in it {
-        let bytes: Vec<u8> = value.borrow().to_bytes();
-        hasher.input(&bytes);
-    }
-
-    let result_hex = hasher.result();
-    BigInt::from_bytes(&result_hex[..])
+#[derive(Debug, Clone, Error)]
+pub enum CorrectKeyProveError {
+    #[error("`challenge.sn[i]` isn't co-prime with `n`")]
+    SniNotCoprimeWithN,
+    #[error("`challenge.z[i]` isn't co-prime with `n`")]
+    ZiNotCoprimeWithN,
+    #[error("`rn[i]` isn't co-prime with `n`")]
+    RniNotCoprimeWithN,
+    #[error("`challenge.e` wasn't computed correctly")]
+    EWasntComputedCorrectly,
 }
 
 #[cfg(test)]
