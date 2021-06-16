@@ -11,68 +11,31 @@
     @license GPL-3.0+ <https://github.com/KZen-networks/zk-paillier/blob/master/LICENSE>
 */
 
-mod zero_enc_proof;
-pub use self::zero_enc_proof::*;
-
 mod correct_ciphertext;
-pub use self::correct_ciphertext::*;
-
-mod multiplication_proof;
-pub use self::multiplication_proof::*;
-
-mod verlin_proof;
-pub use self::verlin_proof::*;
-
-mod wi_dlog_proof;
-pub use self::wi_dlog_proof::*;
-
-mod correct_opening;
-pub use self::correct_opening::CorrectOpening;
-
-pub use self::correct_key::Challenge;
-pub use self::correct_key::CorrectKeyProof;
-pub use self::correct_key::VerificationAid;
 mod correct_key;
-pub use self::correct_key::CorrectKey;
-pub use self::correct_key_ni::SALT_STRING;
-
 mod correct_key_ni;
-pub use self::correct_key_ni::CorrectKeyProofError;
-pub use self::correct_key_ni::NiCorrectKeyProof;
-mod range_proof;
-pub use self::range_proof::RangeProof;
-pub use self::range_proof::RangeProofTrait;
-
-pub use self::range_proof::ChallengeBits;
-pub use self::range_proof::EncryptedPairs;
-pub use self::range_proof::Proof;
-mod range_proof_ni;
-pub use self::range_proof_ni::RangeProofError;
-pub use self::range_proof_ni::RangeProofNi;
-
 mod correct_message;
-pub use self::correct_message::CorrectMessageProof;
-pub use self::correct_message::CorrectMessageProofError;
+mod correct_opening;
+mod multiplication_proof;
+mod range_proof;
+mod range_proof_ni;
+mod verlin_proof;
+mod wi_dlog_proof;
+mod zero_enc_proof;
 
-use std::borrow::Borrow;
+mod utils;
 
-use curv::arithmetic::traits::*;
-use curv::BigInt;
-
-use digest::Digest;
-use sha2::Sha256;
-
-pub fn compute_digest<'a, IT>(it: IT) -> BigInt
-where
-    IT: Iterator,
-    IT::Item: Borrow<BigInt>,
-{
-    let mut hasher = Sha256::new();
-    for value in it {
-        let bytes: Vec<u8> = value.borrow().to_bytes();
-        hasher.input(&bytes);
-    }
-
-    let result_bytes = hasher.result();
-    BigInt::from_bytes(&result_bytes[..])
-}
+pub use self::{
+    correct_ciphertext::*,
+    correct_key::{Challenge, CorrectKey, CorrectKeyProof, VerificationAid},
+    correct_key_ni::{CorrectKeyProofError, NiCorrectKeyProof, SALT_STRING},
+    correct_message::{CorrectMessageProof, CorrectMessageProofError},
+    correct_opening::CorrectOpening,
+    multiplication_proof::*,
+    range_proof::{ChallengeBits, EncryptedPairs, Proof, RangeProof, RangeProofTrait},
+    range_proof_ni::{RangeProofError, RangeProofNi},
+    utils::compute_digest,
+    verlin_proof::*,
+    wi_dlog_proof::*,
+    zero_enc_proof::*,
+};
