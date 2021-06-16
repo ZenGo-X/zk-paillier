@@ -23,6 +23,7 @@ rayon = "1.1"
 bit-vec = "0.6"
 sha2 = "0.8.0"
 digest = "0.8.1"
+thiserror = "1"
 curv = { package = "curv-kzen", version = "0.7", default-features = false }
 
 [dependencies.paillier]

@@ -6,10 +6,10 @@ use curv::BigInt;
 use digest::Digest;
 use sha2::Sha256;
 
-pub fn compute_digest<'a, IT>(it: IT) -> BigInt
-    where
-        IT: Iterator,
-        IT::Item: Borrow<BigInt>,
+pub fn compute_digest<IT>(it: IT) -> BigInt
+where
+    IT: Iterator,
+    IT::Item: Borrow<BigInt>,
 {
     let mut hasher = Sha256::new();
     for value in it {

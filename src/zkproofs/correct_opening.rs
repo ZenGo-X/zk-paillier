@@ -14,16 +14,16 @@
 use paillier::{EncryptWithChosenRandomness, EncryptionKey, Paillier, RawPlaintext};
 
 /// Verify correct opening of ciphertext.
-pub trait CorrectOpening<EK, PT, R, CT> {
-    fn verify_opening(ek: &EK, m: PT, r: R, c: CT) -> bool;
+pub trait CorrectOpening<R, CT> {
+    fn verify_opening(ek: &EncryptionKey, m: RawPlaintext, r: &R, c: &CT) -> bool;
 }
 
-impl<'m, 'r, 'c, R, CT> CorrectOpening<EncryptionKey, RawPlaintext<'m>, &'r R, &'c CT> for Paillier
+impl<R, CT> CorrectOpening<R, CT> for Paillier
 where
-    Self: EncryptWithChosenRandomness<EncryptionKey, RawPlaintext<'m>, &'r R, CT>,
+    Self: for<'a, 'b> EncryptWithChosenRandomness<EncryptionKey, RawPlaintext<'a>, &'b R, CT>,
     CT: PartialEq,
 {
-    fn verify_opening(ek: &EncryptionKey, m: RawPlaintext<'m>, r: &'r R, c: &'c CT) -> bool {
+    fn verify_opening(ek: &EncryptionKey, m: RawPlaintext, r: &R, c: &CT) -> bool {
         let d = Self::encrypt_with_chosen_randomness(ek, m, r);
         c == &d
     }

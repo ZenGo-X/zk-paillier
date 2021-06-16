@@ -14,15 +14,14 @@ use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::{EncryptWithChosenRandomness, EncryptionKey, Paillier, Randomness, RawPlaintext};
 
+use super::errors::IncorrectProof;
+
 const B: usize = 256;
-/// n the case that the message space size is small (a message can be only one of a few possibilities ),
+
+/// In the case that the message space size is small (a message can be only one of a few possibilities ),
 /// it is possible to create a "ring" like structure that proves that the
 /// encrypted value is a message from the message space without revealing the message.
 /// reference: https://paillier.daylightingsociety.org/Paillier_Zero_Knowledge_Proof.pdf
-
-#[derive(Debug)]
-pub struct CorrectMessageProofError;
-
 pub struct CorrectMessageProof {
     e_vec: Vec<BigInt>,
     z_vec: Vec<BigInt>,
@@ -127,7 +126,7 @@ impl CorrectMessageProof {
             ek: ek.clone(),
         }
     }
-    pub fn verify(&self) -> Result<(), CorrectMessageProofError> {
+    pub fn verify(&self) -> Result<(), IncorrectProof> {
         let num_of_message = self.valid_messages.len();
         let two_bn = BigInt::from(2);
         let two_to_security_param: BigInt = two_bn.pow(B as u32);
@@ -158,7 +157,7 @@ impl CorrectMessageProof {
         if result_vec.iter().all(|&x| x) {
             Ok(())
         } else {
-            Err(CorrectMessageProofError)
+            Err(IncorrectProof)
         }
     }
 }

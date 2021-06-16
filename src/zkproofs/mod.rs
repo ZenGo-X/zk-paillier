@@ -23,19 +23,21 @@ mod verlin_proof;
 mod wi_dlog_proof;
 mod zero_enc_proof;
 
+mod errors;
 mod utils;
 
 pub use self::{
     correct_ciphertext::*,
     correct_key::{Challenge, CorrectKey, CorrectKeyProof, VerificationAid},
-    correct_key_ni::{CorrectKeyProofError, NiCorrectKeyProof, SALT_STRING},
-    correct_message::{CorrectMessageProof, CorrectMessageProofError},
+    correct_key_ni::{NiCorrectKeyProof, SALT_STRING},
+    correct_message::CorrectMessageProof,
     correct_opening::CorrectOpening,
     multiplication_proof::*,
-    range_proof::{ChallengeBits, EncryptedPairs, Proof, RangeProof, RangeProofTrait},
-    range_proof_ni::{RangeProofError, RangeProofNi},
-    utils::compute_digest,
+    range_proof::{ChallengeBits, EncryptedPairs, Proof, RangeProof},
+    range_proof_ni::RangeProofNi,
     verlin_proof::*,
     wi_dlog_proof::*,
     zero_enc_proof::*,
 };
+
+pub use self::{errors::IncorrectProof, utils::compute_digest};

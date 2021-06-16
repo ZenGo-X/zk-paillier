@@ -13,7 +13,6 @@
 use std::borrow::Borrow;
 use std::mem;
 
-use super::CorrectKeyProofError;
 use bit_vec::BitVec;
 use curv::arithmetic::traits::*;
 use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
@@ -25,6 +24,8 @@ use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
 use rand::prelude::*;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+
+use super::errors::IncorrectProof;
 
 const STATISTICAL_ERROR_FACTOR: usize = 40;
 
@@ -108,54 +109,13 @@ pub struct ChallengeRandomness(BigInt);
 /// - Appendix A in [Lindell'17](https://eprint.iacr.org/2017/552)
 /// - Section 1.2.2 in [Boudot '00](https://www.iacr.org/archive/eurocrypt2000/1807/18070437-new.pdf)
 ///
-/// /// This is an interactive version of the proof, assuming only DCRA which is alreasy assumed for Paillier cryptosystem security
-pub trait RangeProofTrait {
-    /// Verifier commits to a t-bit vector e where e size is STATISTICAL_ERROR_FACTOR.
-    fn verifier_commit(ek: &EncryptionKey) -> (Commitment, ChallengeRandomness, ChallengeBits); // commitment is public
-
-    /// Prover generates t random pairs, each pair encrypts a number in {q/3, 2q/3} and a number in {0, q/3}
-    fn generate_encrypted_pairs(
-        ek: &EncryptionKey,
-        range: &BigInt,
-        error_factor: usize,
-    ) -> (EncryptedPairs, DataRandomnessPairs);
-
-    /// Verifier decommits to vector e.
-
-    /// Prover check correctness using:
-    fn verify_commit(
-        ek: &EncryptionKey,
-        com: &Commitment,
-        r: &ChallengeRandomness,
-        e: &ChallengeBits,
-    ) -> Result<(), CorrectKeyProofError>;
-
-    /// Prover calcuate z_i according to bit e_i and returns a vector z
-    fn generate_proof(
-        ek: &EncryptionKey,
-        secret_x: &BigInt,
-        secret_r: &BigInt,
-        e: &ChallengeBits,
-        range: &BigInt,
-        data: &DataRandomnessPairs,
-        error_factor: usize,
-    ) -> Proof;
-
-    /// Verifier verifies the proof
-    fn verifier_output(
-        ek: &EncryptionKey,
-        e: &ChallengeBits,
-        encrypted_pairs: &EncryptedPairs,
-        z: &Proof,
-        range: &BigInt,
-        cipher_x: &BigInt,
-        error_factor: usize,
-    ) -> Result<(), CorrectKeyProofError>;
-}
+///
+/// This is an interactive version of the proof, assuming only DCRA which is alreasy assumed for
+/// Paillier cryptosystem security
 pub struct RangeProof;
 
-impl RangeProofTrait for RangeProof {
-    fn verifier_commit(ek: &EncryptionKey) -> (Commitment, ChallengeRandomness, ChallengeBits) {
+impl RangeProof {
+    pub fn verifier_commit(ek: &EncryptionKey) -> (Commitment, ChallengeRandomness, ChallengeBits) {
         let e = ChallengeBits::sample(STATISTICAL_ERROR_FACTOR);
         // commit to challenge
         let m = compute_digest(&e.0);
@@ -165,7 +125,7 @@ impl RangeProofTrait for RangeProof {
         (Commitment(com), ChallengeRandomness(r), e)
     }
 
-    fn generate_encrypted_pairs(
+    pub fn generate_encrypted_pairs(
         ek: &EncryptionKey,
         range: &BigInt,
         error_factor: usize,
@@ -232,22 +192,22 @@ impl RangeProofTrait for RangeProof {
         )
     }
 
-    fn verify_commit(
+    pub fn verify_commit(
         ek: &EncryptionKey,
         com: &Commitment,
         r: &ChallengeRandomness,
         e: &ChallengeBits,
-    ) -> Result<(), CorrectKeyProofError> {
+    ) -> Result<(), IncorrectProof> {
         let m = compute_digest(&e.0);
         let com_tag = get_paillier_commitment(&ek, &m, &r.0);
         if com.0 == com_tag {
             Ok(())
         } else {
-            Err(CorrectKeyProofError)
+            Err(IncorrectProof)
         }
     }
 
-    fn generate_proof(
+    pub fn generate_proof(
         ek: &EncryptionKey,
         secret_x: &BigInt,
         secret_r: &BigInt,
@@ -291,7 +251,7 @@ impl RangeProofTrait for RangeProof {
         Proof(reponses)
     }
 
-    fn verifier_output(
+    pub fn verifier_output(
         ek: &EncryptionKey,
         e: &ChallengeBits,
         encrypted_pairs: &EncryptedPairs,
@@ -299,7 +259,7 @@ impl RangeProofTrait for RangeProof {
         range: &BigInt,
         cipher_x: &BigInt,
         error_factor: usize,
-    ) -> Result<(), CorrectKeyProofError> {
+    ) -> Result<(), IncorrectProof> {
         let cipher_x_raw = RawCiphertext::from(cipher_x);
         let range_scaled_third: BigInt = range.div_floor(&BigInt::from(3i32));
         let range_scaled_two_thirds: BigInt = BigInt::from(2i32) * &range_scaled_third;
@@ -390,7 +350,7 @@ impl RangeProofTrait for RangeProof {
         if verifications.iter().all(|b| *b) {
             Ok(())
         } else {
-            Err(CorrectKeyProofError)
+            Err(IncorrectProof)
         }
     }
 }
@@ -411,7 +371,6 @@ fn compute_digest(bytes: &[u8]) -> BigInt {
 mod tests {
     use super::*;
     use crate::zkproofs::correct_key::CorrectKey;
-    use crate::zkproofs::correct_key::CorrectKeyTrait;
     use paillier::{Keypair, Randomness};
 
     const RANGE_BITS: usize = 256; //for elliptic curves with 256bits for example
