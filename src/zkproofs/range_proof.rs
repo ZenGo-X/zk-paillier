@@ -230,19 +230,19 @@ impl RangeProof {
                         w2: data.w2[i].clone(),
                         r2: data.r2[i].clone(),
                     }
-                } else if secret_x + &data.w1[i] > range_scaled_third
-                    && secret_x + &data.w1[i] < range_scaled_two_thirds
+                } else if secret_x + &data.w1[i] >= range_scaled_third
+                    && secret_x + &data.w1[i] <= range_scaled_two_thirds
                 {
                     Response::Mask {
                         j: 1,
                         masked_x: secret_x + &data.w1[i],
-                        masked_r: secret_r * &data.r1[i] % &ek.n,
+                        masked_r: (secret_r * &data.r1[i]) % &ek.n,
                     }
                 } else {
                     Response::Mask {
                         j: 2,
                         masked_x: secret_x + &data.w2[i],
-                        masked_r: secret_r * &data.r2[i] % &ek.n,
+                        masked_r: (secret_r * &data.r2[i]) % &ek.n,
                     }
                 }
             })
@@ -297,12 +297,14 @@ impl RangeProof {
                             res = false;
                         }
 
-                        let flag = (*w2 < range_scaled_third
-                            && *w1 > range_scaled_third
-                            && *w1 < range_scaled_two_thirds)
-                            || (*w1 < range_scaled_third
-                                && *w2 > range_scaled_third
-                                && *w2 < range_scaled_two_thirds);
+                        let flag = (*w2 >= BigInt::zero()
+                            && *w2 <= range_scaled_third
+                            && *w1 >= range_scaled_third
+                            && *w1 <= range_scaled_two_thirds)
+                            || (*w1 >= BigInt::zero()
+                                && *w1 <= range_scaled_third
+                                && *w2 >= range_scaled_third
+                                && *w2 <= range_scaled_two_thirds);
 
                         if !flag {
                             res = false;
