@@ -84,7 +84,7 @@ impl NiCorrectKeyProof {
                 mask_generation(key_length, &seed_bn) % &ek.n
             })
             .collect::<Vec<BigInt>>();
-        let alpha_primorial: BigInt = BigInt::from_str_radix(&P, 10).unwrap();
+        let alpha_primorial: BigInt = BigInt::from_str_radix(P, 10).unwrap();
         let gcd_test = alpha_primorial.gcd(&ek.n);
 
         let derived_rho_vec = (0..M2)

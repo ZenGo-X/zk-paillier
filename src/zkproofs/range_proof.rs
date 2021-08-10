@@ -120,7 +120,7 @@ impl RangeProof {
         // commit to challenge
         let m = compute_digest(&e.0);
         let r = BigInt::sample_below(&ek.n);
-        let com = get_paillier_commitment(&ek, &m, &r);
+        let com = get_paillier_commitment(ek, &m, &r);
 
         (Commitment(com), ChallengeRandomness(r), e)
     }
@@ -199,7 +199,7 @@ impl RangeProof {
         e: &ChallengeBits,
     ) -> Result<(), IncorrectProof> {
         let m = compute_digest(&e.0);
-        let com_tag = get_paillier_commitment(&ek, &m, &r.0);
+        let com_tag = get_paillier_commitment(ek, &m, &r.0);
         if com.0 == com_tag {
             Ok(())
         } else {
