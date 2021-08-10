@@ -177,6 +177,23 @@ mod tests {
     }
 
     #[test]
+    fn test_verifier_for_correct_proofs_for_small_range_many_times() {
+        for _ in 0..100 {
+            let (ek, _dk) = test_keypair().keys();
+            let range = BigInt::sample(6000);
+            let secret_r = BigInt::sample_below(&ek.n);
+            let secret_x = BigInt::sample_below(&range.div_floor(&BigInt::from(3)));
+            let cipher_x = Paillier::encrypt_with_chosen_randomness(
+                &ek,
+                RawPlaintext::from(&secret_x),
+                &Randomness(secret_r.clone()),
+            );
+            let range_proof = RangeProofNi::prove(&ek, &range, &cipher_x.0, &secret_x, &secret_r);
+            range_proof.verify(&ek, &cipher_x.0).unwrap();
+        }
+    }
+
+    #[test]
     #[should_panic]
     fn test_verifier_for_incorrect_proof() {
         let (ek, _dk) = test_keypair().keys();
