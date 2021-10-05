@@ -361,7 +361,7 @@ fn get_paillier_commitment(ek: &EncryptionKey, x: &BigInt, r: &BigInt) -> BigInt
 }
 
 fn compute_digest(bytes: &[u8]) -> BigInt {
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
     hasher.update(bytes);
     BigInt::from_bytes(&hasher.finalize())
