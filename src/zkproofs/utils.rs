@@ -14,9 +14,9 @@ where
     let mut hasher = Sha256::new();
     for value in it {
         let bytes: Vec<u8> = value.borrow().to_bytes();
-        hasher.input(&bytes);
+        hasher.update(&bytes);
     }
 
-    let result_bytes = hasher.result();
+    let result_bytes = hasher.finalize();
     BigInt::from_bytes(&result_bytes[..])
 }
