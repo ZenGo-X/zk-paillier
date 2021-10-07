@@ -14,9 +14,8 @@ use std::borrow::Borrow;
 use std::mem;
 
 use bit_vec::BitVec;
-use sha2::{Digest, Sha256};
-use curv::cryptographic_primitives::hashing::DigestExt;
 use curv::arithmetic::traits::*;
+use curv::cryptographic_primitives::hashing::DigestExt;
 use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
@@ -24,6 +23,7 @@ use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
 use rand::prelude::*;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 use super::errors::IncorrectProof;
 
