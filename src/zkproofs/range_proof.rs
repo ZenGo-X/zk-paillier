@@ -14,6 +14,8 @@ use std::borrow::Borrow;
 use std::mem;
 
 use bit_vec::BitVec;
+use sha2::{Digest, Sha256};
+use curv::cryptographic_primitives::hashing::DigestExt;
 use curv::arithmetic::traits::*;
 use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
@@ -361,10 +363,9 @@ fn get_paillier_commitment(ek: &EncryptionKey, x: &BigInt, r: &BigInt) -> BigInt
 }
 
 fn compute_digest(bytes: &[u8]) -> BigInt {
-    use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
     hasher.update(bytes);
-    BigInt::from_bytes(&hasher.finalize())
+    hasher.result_bigint()
 }
 
 #[cfg(test)]
