@@ -15,8 +15,7 @@ use std::mem;
 
 use bit_vec::BitVec;
 use curv::arithmetic::traits::*;
-use curv::cryptographic_primitives::hashing::hash_sha256::HSha256;
-use curv::cryptographic_primitives::hashing::traits::Hash;
+use curv::cryptographic_primitives::hashing::DigestExt;
 use curv::BigInt;
 use paillier::EncryptWithChosenRandomness;
 use paillier::Paillier;
@@ -24,6 +23,7 @@ use paillier::{EncryptionKey, Randomness, RawCiphertext, RawPlaintext};
 use rand::prelude::*;
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 use super::errors::IncorrectProof;
 
@@ -120,7 +120,7 @@ impl RangeProof {
         // commit to challenge
         let m = compute_digest(&e.0);
         let r = BigInt::sample_below(&ek.n);
-        let com = get_paillier_commitment(&ek, &m, &r);
+        let com = get_paillier_commitment(ek, &m, &r);
 
         (Commitment(com), ChallengeRandomness(r), e)
     }
@@ -199,7 +199,7 @@ impl RangeProof {
         e: &ChallengeBits,
     ) -> Result<(), IncorrectProof> {
         let m = compute_digest(&e.0);
-        let com_tag = get_paillier_commitment(&ek, &m, &r.0);
+        let com_tag = get_paillier_commitment(ek, &m, &r.0);
         if com.0 == com_tag {
             Ok(())
         } else {
@@ -363,8 +363,9 @@ fn get_paillier_commitment(ek: &EncryptionKey, x: &BigInt, r: &BigInt) -> BigInt
 }
 
 fn compute_digest(bytes: &[u8]) -> BigInt {
-    let input = BigInt::from_bytes(bytes);
-    HSha256::create_hash(&[&input])
+    let mut hasher = Sha256::new();
+    hasher.update(bytes);
+    hasher.result_bigint()
 }
 
 #[cfg(test)]

@@ -1,6 +1,6 @@
 [package]
 name = "zk-paillier"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2018"
 description = "Collection of Paillier cryptosystem zero knowledge proofs written in Rust"
 license = "GPL-3.0-or-later"
@@ -22,25 +22,24 @@ rand = "0.6"
 serde = { version = "1.0", features = ["derive"] }
 rayon = "1.1"
 bit-vec = "0.6"
-sha2 = "0.8.0"
-digest = "0.8.1"
+sha2 = "0.9"
+digest = "0.9"
 thiserror = "1"
 
-[dependencies.curv]
-package = "curv-kzen"
-version = "0.7"
+[dependencies.curv-kzen]
+version = "0.8"
 default-features = false
 
 [dependencies.paillier]
 package = "kzen-paillier"
-version = "0.4"
+version = "0.4.1"
 default-features = false
 
 [dev-dependencies]
 criterion = "0.3"
 
 [features]
-default = ["curv/rust-gmp-kzen"]
+default = ["curv-kzen/rust-gmp-kzen"]
 
 [[bench]]
 name = "all"
