@@ -27,7 +27,7 @@ use super::errors::IncorrectProof;
 ///
 /// 1. Prover picks random: a,a_prime,a_double_prime and r_a and computes: phi_a
 /// 2. prover computes a challenge e using Fiat-Shamir
-/// 3. Prover computes  z = xe + a, z' = x'e + a', z_double_prime = x_double_prime*e + a_double_prime
+/// 3. Prover computes z = xe + a, z' = x'e + a', z_double_prime = x_double_prime*e + a_double_prime
 ///    and r_z = r_x^e*r_a
 ///
 /// Verifier accepts if phi_z = phi_x^e * phi_a

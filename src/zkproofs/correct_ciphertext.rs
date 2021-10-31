@@ -14,9 +14,9 @@ use super::errors::IncorrectProof;
 /// This proof shows that a paillier ciphertext was constructed correctly
 ///
 /// The proof is taken from https://www.brics.dk/RS/00/14/BRICS-RS-00-14.pdf 9.1.3
-/// Given a ciphertext c and a prover encryption key , a prover wants to prove that it knows (x,r) such that c = Enc(x,r)
+/// Given a ciphertext c and a prover encryption key, a prover wants to prove that it knows (x,r) such that c = Enc(x,r)
 /// 1) P picks x',r' at random, and computes c' = Enc(x', r')
-/// 2) P computes z1 = x' + ex , z2 = r' *r^e  (e is a varifier challenge)
+/// 2) P computes z1 = x' + ex , z2 = r' *r^e  (e is a verifier challenge)
 /// 3) P sends, c' , z1,z2
 /// 4) V accepts if 1) Enc(z1,z2 ) = c' * c^e
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]

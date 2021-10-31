@@ -110,7 +110,7 @@ pub struct ChallengeRandomness(BigInt);
 /// - Section 1.2.2 in [Boudot '00](https://www.iacr.org/archive/eurocrypt2000/1807/18070437-new.pdf)
 ///
 ///
-/// This is an interactive version of the proof, assuming only DCRA which is alreasy assumed for
+/// This is an interactive version of the proof, assuming only DCRA which is already assumed for
 /// Paillier cryptosystem security
 pub struct RangeProof;
 
@@ -219,7 +219,7 @@ impl RangeProof {
         let range_scaled_third: BigInt = range.div_floor(&BigInt::from(3));
         let range_scaled_two_thirds = BigInt::from(2) * &range_scaled_third;
         let bits_of_e = BitVec::from_bytes(&e.0);
-        let reponses: Vec<_> = (0..error_factor)
+        let responses: Vec<_> = (0..error_factor)
             .into_par_iter()
             .map(|i| {
                 let ei = bits_of_e[i];
@@ -248,7 +248,7 @@ impl RangeProof {
             })
             .collect();
 
-        Proof(reponses)
+        Proof(responses)
     }
 
     pub fn verifier_output(

@@ -103,11 +103,11 @@ impl NiCorrectKeyProof {
 /// Generates random element.
 /// Based on https://tools.ietf.org/html/rfc8017#appendix-B.2.1
 pub fn mask_generation(out_length: usize, seed: &BigInt) -> BigInt {
-    let msklen = out_length / DIGEST_SIZE + 1; // adding one sha256 is more efficient then rejection sampling (see A.4 (e) in the paper)
+    let msklen = out_length / DIGEST_SIZE + 1; // adding one sha256 is more efficient than rejection sampling (see A.4 (e) in the paper)
     let msklen_hash_vec = (0..msklen)
         .map(|j| {
             super::compute_digest(iter::once(seed).chain(iter::once(&BigInt::from(j as u32))))
-            // concat elements of  msklen_hash_vec to one long element
+            // concat elements of msklen_hash_vec to one long element
         })
         .collect::<Vec<BigInt>>();
     msklen_hash_vec
