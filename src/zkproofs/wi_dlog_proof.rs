@@ -56,7 +56,8 @@ impl CompositeDLogProof {
         let e = super::compute_digest(
             iter::once(&x)
                 .chain(iter::once(&statement.g))
-                .chain(iter::once(&statement.N)),
+                .chain(iter::once(&statement.N))
+                .chain(iter::once(&statement.ni)),
         );
         let y = &r + &e * secret;
 
@@ -74,7 +75,8 @@ impl CompositeDLogProof {
         let e = super::compute_digest(
             iter::once(&self.x)
                 .chain(iter::once(&statement.g))
-                .chain(iter::once(&statement.N)),
+                .chain(iter::once(&statement.N))
+                .chain(iter::once(&statement.ni)),
         );
         let ni_e = BigInt::mod_pow(&statement.ni, &e, &statement.N);
         let g_y = BigInt::mod_pow(&statement.g, &self.y, &statement.N);
