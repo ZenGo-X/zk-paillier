@@ -27,7 +27,7 @@ digest = "0.9"
 thiserror = "1"
 
 [dependencies.curv-kzen]
-version = "0.9"
+version = "0.10"
 default-features = false
 
 [dependencies.paillier]
