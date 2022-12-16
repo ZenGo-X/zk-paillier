@@ -1,6 +1,6 @@
 [package]
 name = "zk-paillier"
-version = "0.4.3"
+version = "0.4.4"
 edition = "2018"
 description = "Collection of Paillier cryptosystem zero knowledge proofs written in Rust"
 license = "GPL-3.0-or-later"
