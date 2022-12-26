@@ -32,7 +32,7 @@ default-features = false
 
 [dependencies.paillier]
 package = "kzen-paillier"
-version = "0.4"
+version = "0.4.3"
 default-features = false
 
 [dev-dependencies]
