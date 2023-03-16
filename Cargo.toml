@@ -15,7 +15,6 @@ categories = ["cryptography"]
 
 [lib]
 crate-type = ["lib"]
-
 [dependencies]
 rand = "0.6"
 serde = { version = "1.0", features = ["derive"] }
@@ -23,18 +22,19 @@ rayon = "1.1"
 bit-vec = "0.6"
 sha2 = "0.8.0"
 digest = "0.8.1"
-curv = { package = "curv-kzen", version = "0.7", default-features = false }
+curv = {path="../curv" ,version="0.7.0",features=["num-bigint"],default-features = false }
+paillier = {path="../rust-paillier" ,version="*" ,default-features = false }
 
-[dependencies.paillier]
-git = "https://github.com/KZen-networks/rust-paillier"
-tag = "v0.3.10"
-default-features = false
+#[dependencies.paillier]
+#git = "https://github.com/KZen-networks/rust-paillier"
+#tag = "v0.3.10"
+#default-features = false
 
 [dev-dependencies]
 criterion = "0.3"
 
-[features]
-default = ["curv/rust-gmp-kzen"]
+#[features]
+#default = ["curv/rust-gmp-kzen"]
 
 [[bench]]
 name = "all"
