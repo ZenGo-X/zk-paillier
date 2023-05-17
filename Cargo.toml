@@ -22,7 +22,7 @@ rayon = "1.1"
 bit-vec = "0.6"
 sha2 = "0.8.0"
 digest = "0.8.1"
-curv = {path="../curv" ,version="0.7.0",features=["num-bigint"],default-features = false }
+curv = {path="../curv" ,version="0.7.0",default-features = false }
 paillier = {path="../rust-paillier" ,version="*" ,default-features = false }
 
 #[dependencies.paillier]
@@ -33,8 +33,8 @@ paillier = {path="../rust-paillier" ,version="*" ,default-features = false }
 [dev-dependencies]
 criterion = "0.3"
 
-#[features]
-#default = ["curv/rust-gmp-kzen"]
+[features]
+default = ["curv/rust-gmp-kzen"]
 
 [[bench]]
 name = "all"
